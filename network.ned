@@ -2,6 +2,7 @@ simple Generator
 {
     parameters:
         volatile double generationInterval; // sec
+        volatile int    packetByteSize;        // byte
         @display("i=block/source");
     gates:
         output out;
@@ -10,7 +11,7 @@ simple Generator
 simple Queue
 {
     parameters:
-        volatile double serviceTime; // sec
+        volatile int bufferSize;  // cant packets
         @display("i=block/queue;q=buffer");
     gates:
         input in;
