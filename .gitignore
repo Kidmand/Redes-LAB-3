@@ -1,0 +1,5 @@
+out/*
+.settings/language.settings.xml
+./Makefile
+lab3-kickstarter
+.qtenvrc
