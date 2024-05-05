@@ -26,6 +26,27 @@ simple Sink
         input in;
 }
 
+simple TransportTx 
+{
+    parameters;
+        int bufferSize;
+        @diplay("i=block/queue;q=buffer");
+    gates: 
+        input toApp;
+        inout toOut;
+}
+
+
+simple TransportRx 
+{
+    parameters;
+        int bufferSize;
+        @diplay("i=block/queue;q=buffer");
+    gates:
+        output toApp;
+        inout toOut;
+}
+
 module NodeTx 
 {
     parameters:
@@ -37,13 +58,13 @@ module NodeTx
             parameters:
                 @display("p=75,50");
         }
-        queue: Queue {
+        traTx: TransportTx {
             parameters: 
                 @display("p=75,190");
         }
     connections:
-        gen.out --> queue.in;
-        queue.out --> out; 
+        gen.out --> traTx.in;
+        traTx.out --> out; 
 }
 
 module NodeRx 
@@ -57,16 +78,16 @@ module NodeRx
             parameters:
                 @display("p=75,50");
         }
-        queue: Queue {
+        traRx: TransportRx {
             parameters: 
                 @display("p=75,190");
         }
     connections:
-        in --> queue.in;
+        in --> traRx.in;
         //case study 1:
-        queue.out --> { datarate = 0.5Mps; } --> sink.in;
+        traRx.out --> { datarate = 0.5Mps; } --> sink.in;
         //case study 2:
-        // queue.out --> { datarate =1Mbps; } --> sink.in;
+        // traRx.out --> { datarate = 1Mbps; } --> sink.in;
 }
 
 
@@ -78,18 +99,43 @@ network Network
         nodeTx: NodeTx {
             @display("p=30,30");
         }
-        queue: Queue {
+        queue[0]: Queue {
             @display("p=130,30");
+        }
+        queue[1]: Queue {
+            @display("p=130,50");
         }
         nodeRx: NodeRx {
             @display("p=230,30");
         }
     connections:
-        nodeTx.out --> { datarate = 1Mbps; delay = 100us; } --> queue.in;
-        // case study 1:
-        queue.out --> { datarate = 1Mbps; delay = 100us; } --> nodeRx.in;
-        // case study 2:
-        // queue.out --> { datarate = 0.5Mbps; delay = 100us; } --> nodeRx.in;
+        //-------------------------------- LA IDA --------------------------------------------//
+        
+        //Enlace desde nodeTx.out --> queue[0].in:
+        nodeTx.out --> { datarate = 1Mbps; delay = 100us; } --> queue[0].in;
+     
+        
+        // Enlaces desde queue[0] --> nodeRx.in:
+        // - case study 1:
+        queue[0].out --> { datarate = 1Mbps; delay = 100us; } --> nodeRx.in;
+        // - case study 2:
+        // queue[0].out --> { datarate = 0.5Mbps; delay = 100us; } --> nodeRx.in;
+        
+        //-------------------------------------------------------------------------------------//  
+        
+        //-------------------------------- LA VUELTA ------------------------------------------//
+
+        //Enlaces desde nodeRx.out --> queue[1].in:
+        // - case study 1:
+        nodeRx.out --> { datarate = 1Mbps; delay = 100us; } --> queue[1].in;
+        // - case study 2:
+        // nodeRx.out --> { datarate = 0.5Mbps; delay = 100us; } --> queue[1].in;
+        
+        
+        //Enlace desde queue[1].out --> nodeTx.in:
+        queue[1].out --> { datarate = 1Mbps; delay = 100us; } --> nodeTx.in 
+
+        //------------------------------------------------------------------------------------//
 }
 
 
