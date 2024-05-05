@@ -85,7 +85,7 @@ module NodeRx
     connections:
         in <--> traRx.toOut;
         //case study 1:
-        traRx.toApp --> { datarate = 0.5Mps; } --> sink.in;
+        traRx.toApp --> { datarate = 0.5Mbps; } --> sink.in;
         //case study 2:
         // traRx.toOut --> { datarate = 1Mbps; } --> sink.in;
 }
