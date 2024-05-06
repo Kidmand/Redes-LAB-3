@@ -67,13 +67,15 @@ void TransportTx::handleMessage(cMessage *msg)
     {
         FeedbackPkt *feedbackPkt = (FeedbackPkt *)msg;
 
+        // FIXME: borrar en algun momento estos prints:
+        // EV << "TX: IsBufferSaturated: " << (feedbackPkt->getIsBufferSaturated() ? "True" : "False") << endl;
         if (feedbackPkt->getIsBufferSaturated())
         {
-            delayPkt++;
+            delayPkt += 1;
         }
-        else if (delayPkt > 0)
+        else
         {
-            delayPkt--;
+            delayPkt = 0;
         }
 
         delete (msg);
@@ -89,7 +91,7 @@ void TransportTx::handleMessage(cMessage *msg)
             send(pkt, "toOut$o");
             // start new service
             serviceTime = pkt->getDuration();
-            scheduleAt(simTime() + serviceTime, endServiceEvent);
+            scheduleAt(simTime() + serviceTime + delayPkt, endServiceEvent);
         }
     }
     else
@@ -110,7 +112,7 @@ void TransportTx::handleMessage(cMessage *msg)
             if (!endServiceEvent->isScheduled())
             {
                 // Start the service
-                scheduleAt(simTime() + delayPkt, endServiceEvent);
+                scheduleAt(simTime() + 0, endServiceEvent);
             }
         }
     }

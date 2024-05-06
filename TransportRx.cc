@@ -10,6 +10,7 @@ class TransportRx : public cSimpleModule
 {
 private:
     cQueue buffer;
+    bool isBufferSaturated;
     cMessage *endServiceEvent;
     simtime_t serviceTime;
     cOutVector bufferSizeVector;
@@ -32,6 +33,7 @@ Define_Module(TransportRx);
 TransportRx::TransportRx()
 {
     endServiceEvent = NULL;
+    isBufferSaturated = false;
 }
 
 TransportRx::~TransportRx()
@@ -107,12 +109,13 @@ void TransportRx::handleMessage(cMessage *msg)
                 // Start the service
                 scheduleAt(simTime() + 0, endServiceEvent);
             }
-            bool isBufferSaturated = buffer.getLength() >= par("bufferSize").intValue() * par("bufferCota").doubleValue();
-            // if (buffer.getLength() >= par("bufferSize").intValue() * par("bufferCota").doubleValue())
-            //{
+
+            isBufferSaturated = buffer.getLength() > par("bufferSize").intValue() * par("bufferCota").doubleValue();
+
+            // FIXME: borrar en algun momento estos prints:
+            // EV << "RX: IsBufferSaturated: " << (isBufferSaturated ? "True" : "False") << endl;
             this->sendFeedbackPkt(isBufferSaturated);
-            sendFeedbackPktVector.record(1);
-            // }
+            sendFeedbackPktVector.record(isBufferSaturated ? 1 : 0);
         }
     }
 }
