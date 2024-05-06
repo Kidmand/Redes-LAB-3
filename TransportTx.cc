@@ -3,11 +3,13 @@
 
 #include <string.h>
 #include <omnetpp.h>
+#include "./FeedbackPkt_m.h"
 
 using namespace omnetpp;
 class TransportTx : public cSimpleModule
 {
 private:
+    unsigned int delayPkt;
     cQueue buffer;
     cMessage *endServiceEvent;
     simtime_t serviceTime;
@@ -30,6 +32,7 @@ Define_Module(TransportTx);
 TransportTx::TransportTx()
 {
     endServiceEvent = NULL;
+    delayPkt = 0;
 }
 
 TransportTx::~TransportTx()
@@ -60,7 +63,22 @@ void TransportTx::finish()
 void TransportTx::handleMessage(cMessage *msg)
 {
     // if msg is signaling an endServiceEvent
-    if (msg == endServiceEvent)
+    if (msg->getKind() == 2)
+    {
+        FeedbackPkt *feedbackPkt = (FeedbackPkt *)msg;
+
+        if (feedbackPkt->getIsBufferSaturated())
+        {
+            delayPkt++;
+        }
+        else if (delayPkt > 0)
+        {
+            delayPkt--;
+        }
+
+        delete (msg);
+    }
+    else if (msg == endServiceEvent)
     {
         // if packet in buffer, send next one
         if (!buffer.isEmpty())
@@ -92,7 +110,7 @@ void TransportTx::handleMessage(cMessage *msg)
             if (!endServiceEvent->isScheduled())
             {
                 // Start the service
-                scheduleAt(simTime() + 0, endServiceEvent);
+                scheduleAt(simTime() + delayPkt, endServiceEvent);
             }
         }
     }

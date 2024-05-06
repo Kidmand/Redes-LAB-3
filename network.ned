@@ -51,7 +51,7 @@ simple TransportRx
 module NodeTx 
 {
     parameters:
-        @display("i=block/routing");
+        @display("i=block/routing;q=buffer");
     gates:
         inout  out;
     submodules:
@@ -71,7 +71,7 @@ module NodeTx
 module NodeRx 
 {
     parameters:
-        @display("i=block/routing");
+        @display("i=block/routing;q=buffer");
     gates:
         inout in;
     submodules:
@@ -85,10 +85,12 @@ module NodeRx
         }
     connections:
         in <--> traRx.toOut;
-        //case study 1:
+        // case study 1:
+        // traRx.toApp --> { datarate = 0.5Mbps; } --> sink.in;
+        // case study 2:
+        // traRx.toApp --> { datarate = 1Mbps; } --> sink.in;
+        // case study 3 (creado por nosotros):
         traRx.toApp --> { datarate = 0.5Mbps; } --> sink.in;
-        //case study 2:
-        // traRx.toOut --> { datarate = 1Mbps; } --> sink.in;
 }
 
 
@@ -118,9 +120,11 @@ network Network
         
         // Enlaces desde queue0 --> nodeRx.in:
         // - case study 1:
-        queue0.out --> { datarate = 1Mbps; delay = 100us; } --> nodeRx.in$i;
+        // queue0.out --> { datarate = 1Mbps; delay = 100us; } --> nodeRx.in$i;
         // - case study 2:
         // queue0.out --> { datarate = 0.5Mbps; delay = 100us; } --> nodeRx.in$i;
+        // - case study 3 (creado por nosotros):
+        queue0.out --> { datarate = 1Mbps; delay = 100us; } --> nodeRx.in$i;
         
         //-------------------------------------------------------------------------------------//  
         
@@ -128,9 +132,11 @@ network Network
 
         //Enlaces desde nodeRx.in --> queue1.in:
         // - case study 1:
-        nodeRx.in$o --> { datarate = 1Mbps; delay = 100us; } --> queue1.in;
+        // nodeRx.in$o --> { datarate = 1Mbps; delay = 100us; } --> queue1.in;
         // - case study 2:
         // nodeRx.in$o --> { datarate = 0.5Mbps; delay = 100us; } --> queue1.in;
+        // - case study 3 (creado por nosotros):
+        nodeRx.in$o --> { datarate = 1Mbps; delay = 100us; } --> queue1.in;
         
         
         //Enlace desde queue1.out --> nodeTx.in:

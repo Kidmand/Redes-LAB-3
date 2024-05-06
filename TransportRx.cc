@@ -14,7 +14,7 @@ private:
     simtime_t serviceTime;
     cOutVector bufferSizeVector;
     cOutVector packetDropVector;
-    cOutVector sendAckVector;
+    cOutVector sendFeedbackPktVector;
 
 public:
     TransportRx();
@@ -24,6 +24,7 @@ protected:
     virtual void initialize();
     virtual void finish();
     virtual void handleMessage(cMessage *msg);
+    void sendFeedbackPkt(bool isBufferSaturated);
 };
 
 Define_Module(TransportRx);
@@ -50,12 +51,23 @@ void TransportRx::initialize()
     packetDropVector.setName("PacketDropVector");
     packetDropVector.record(0); // Inicializar con 0
 
-    sendAckVector.setName("SendAckVector");
-    sendAckVector.record(0); // Inicializar con 0
+    sendFeedbackPktVector.setName("SendFeedbackPktVector");
+    sendFeedbackPktVector.record(0); // Inicializar con 0
 }
 
 void TransportRx::finish()
 {
+}
+
+void TransportRx::sendFeedbackPkt(bool isBufferSaturated)
+{
+    // Create FeedbackPkt:
+    FeedbackPkt *feedbackPkt = new FeedbackPkt();
+    feedbackPkt->setByteLength(20);
+    feedbackPkt->setKind(2);
+
+    feedbackPkt->setIsBufferSaturated(isBufferSaturated);
+    send(feedbackPkt, "toOut$o");
 }
 
 void TransportRx::handleMessage(cMessage *msg)
@@ -77,11 +89,6 @@ void TransportRx::handleMessage(cMessage *msg)
     }
     else
     {
-        // Create FeedbackPkt:
-        FeedbackPkt *feedbackPkt = new FeedbackPkt();
-        feedbackPkt->setByteLength(20);
-        feedbackPkt->setKind(2);
-
         // Verificar si el buffer está lleno
         if (buffer.getLength() >= par("bufferSize").intValue())
         {
@@ -100,6 +107,12 @@ void TransportRx::handleMessage(cMessage *msg)
                 // Start the service
                 scheduleAt(simTime() + 0, endServiceEvent);
             }
+            bool isBufferSaturated = buffer.getLength() >= par("bufferSize").intValue() * par("bufferCota").doubleValue();
+            // if (buffer.getLength() >= par("bufferSize").intValue() * par("bufferCota").doubleValue())
+            //{
+            this->sendFeedbackPkt(isBufferSaturated);
+            sendFeedbackPktVector.record(1);
+            // }
         }
     }
 }

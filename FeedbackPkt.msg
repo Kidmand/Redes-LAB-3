@@ -1,4 +1,4 @@
 packet FeedbackPkt
 {
-    boolean isBufferSaturated;  
+    bool IsBufferSaturated;  
 };
