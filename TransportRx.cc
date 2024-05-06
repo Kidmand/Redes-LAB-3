@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <omnetpp.h>
+#include "./FeedbackPkt_m.h"
 
 using namespace omnetpp;
 class TransportRx : public cSimpleModule
@@ -76,6 +77,11 @@ void TransportRx::handleMessage(cMessage *msg)
     }
     else
     {
+        // Create FeedbackPkt:
+        FeedbackPkt *feedbackPkt = new FeedbackPkt();
+        feedbackPkt->setByteLength(20);
+        feedbackPkt->setKind(2);
+
         // Verificar si el buffer está lleno
         if (buffer.getLength() >= par("bufferSize").intValue())
         {

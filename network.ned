@@ -40,6 +40,7 @@ simple TransportTx
 simple TransportRx 
 {
     parameters:
+        double bufferCota;
         int bufferSize;
         @display("i=block/queue;q=buffer");
     gates:
