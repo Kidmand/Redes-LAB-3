@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <omnetpp.h>
+#include "./FeedbackPkt_m.h"
 
 using namespace omnetpp;
 
@@ -10,6 +11,7 @@ class Queue : public cSimpleModule
 {
 private:
     cQueue buffer;
+    bool isBufferSaturated;
     cMessage *endServiceEvent;
     simtime_t serviceTime;
     cOutVector bufferSizeVector;
@@ -23,6 +25,8 @@ protected:
     virtual void initialize();
     virtual void finish();
     virtual void handleMessage(cMessage *msg);
+    void sendFeedbackPkt(bool isBufferSaturated);
+    bool isActuallBufferSatured(void);
 };
 
 Define_Module(Queue);
@@ -30,6 +34,7 @@ Define_Module(Queue);
 Queue::Queue()
 {
     endServiceEvent = NULL;
+    isBufferSaturated = false;
 }
 
 Queue::~Queue()
@@ -55,6 +60,22 @@ void Queue::finish()
 {
 }
 
+void Queue::sendFeedbackPkt(bool isBufferSaturated)
+{
+    // Create FeedbackPkt:
+    FeedbackPkt *feedbackPkt = new FeedbackPkt();
+    feedbackPkt->setByteLength(20);
+    feedbackPkt->setKind(2);
+
+    feedbackPkt->setIsBufferSaturated(isBufferSaturated);
+    buffer.insertBefore(buffer.front(), feedbackPkt);
+}
+
+bool Queue::isActuallBufferSatured(void)
+{
+    return buffer.getLength() > par("bufferSize").intValue() * par("bufferCota").doubleValue();
+}
+
 void Queue::handleMessage(cMessage *msg)
 {
 
@@ -71,6 +92,28 @@ void Queue::handleMessage(cMessage *msg)
             // start new service
             serviceTime = pkt->getDuration();
             scheduleAt(simTime() + serviceTime, endServiceEvent);
+
+            // Verificar si el buffer está saturado y  enviamos el feedback correspondiente:
+            if (isActuallBufferSatured())
+            {
+                // Si el buffer está saturado y no lo estaba antes enviamos
+                // un feedbackIPkt avisando que el buffer está saturado:
+                if (!isBufferSaturated)
+                {
+                    isBufferSaturated = true;
+                    sendFeedbackPkt(isBufferSaturated);
+                }
+            }
+            else
+            {
+                // Si el buffer no está saturado y lo estaba antes enviamos
+                // un feedbackIPkt avisando que el buffer no está saturado:
+                if (isBufferSaturated)
+                {
+                    isBufferSaturated = false;
+                    sendFeedbackPkt(isBufferSaturated);
+                }
+            }
         }
     }
     else

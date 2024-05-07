@@ -11,6 +11,7 @@ class TransportRx : public cSimpleModule
 private:
     cQueue buffer;
     bool isBufferSaturated;
+    bool isNetworkSaturated;
     cMessage *endServiceEvent;
     simtime_t serviceTime;
     cOutVector bufferSizeVector;
@@ -26,6 +27,7 @@ protected:
     virtual void finish();
     virtual void handleMessage(cMessage *msg);
     void sendFeedbackPkt(bool isBufferSaturated);
+    bool isActuallBufferSatured(void);
 };
 
 Define_Module(TransportRx);
@@ -34,6 +36,7 @@ TransportRx::TransportRx()
 {
     endServiceEvent = NULL;
     isBufferSaturated = false;
+    isNetworkSaturated = false;
 }
 
 TransportRx::~TransportRx()
@@ -67,15 +70,23 @@ void TransportRx::sendFeedbackPkt(bool isBufferSaturated)
     FeedbackPkt *feedbackPkt = new FeedbackPkt();
     feedbackPkt->setByteLength(20);
     feedbackPkt->setKind(2);
-
     feedbackPkt->setIsBufferSaturated(isBufferSaturated);
     send(feedbackPkt, "toOut$o");
 }
 
+bool TransportRx::isActuallBufferSatured(void)
+{
+    return buffer.getLength() > par("bufferSize").intValue() * par("bufferCota").doubleValue();
+}
+
 void TransportRx::handleMessage(cMessage *msg)
 {
-    // if msg is signaling an endServiceEvent
-    if (msg == endServiceEvent)
+    if (msg->getKind() == 2) // Recibimos un FeedbackPkt desde algun nodo de la red.
+    {
+        isNetworkSaturated = ((FeedbackPkt *)msg)->getIsBufferSaturated();
+        delete (msg);
+    }
+    else if (msg == endServiceEvent) // if msg is signaling an endServiceEvent
     {
         // if packet in buffer, send next one
         if (!buffer.isEmpty())
@@ -87,6 +98,17 @@ void TransportRx::handleMessage(cMessage *msg)
             // start new service
             serviceTime = pkt->getDuration();
             scheduleAt(simTime() + serviceTime, endServiceEvent);
+
+            // Manejo de FeedbackPkt:
+            isBufferSaturated = isActuallBufferSatured();
+
+            // FIXME: borrar en algun momento estos prints:
+            // EV << "RX: IsBufferSaturated: " << (isBufferSaturated ? "True" : "False") << endl;
+            // EV << "RX: isNetworkSaturated: " << (isNetworkSaturated ? "True" : "False") << endl;
+
+            bool response = isBufferSaturated || isNetworkSaturated;
+            sendFeedbackPkt(response);
+            sendFeedbackPktVector.record(response ? 1 : 0);
         }
     }
     else
@@ -109,13 +131,6 @@ void TransportRx::handleMessage(cMessage *msg)
                 // Start the service
                 scheduleAt(simTime() + 0, endServiceEvent);
             }
-
-            isBufferSaturated = buffer.getLength() > par("bufferSize").intValue() * par("bufferCota").doubleValue();
-
-            // FIXME: borrar en algun momento estos prints:
-            // EV << "RX: IsBufferSaturated: " << (isBufferSaturated ? "True" : "False") << endl;
-            this->sendFeedbackPkt(isBufferSaturated);
-            sendFeedbackPktVector.record(isBufferSaturated ? 1 : 0);
         }
     }
 }

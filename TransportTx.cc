@@ -9,7 +9,7 @@ using namespace omnetpp;
 class TransportTx : public cSimpleModule
 {
 private:
-    unsigned int delayPkt;
+    bool isNetworkSaturated;
     cQueue buffer;
     cMessage *endServiceEvent;
     simtime_t serviceTime;
@@ -32,7 +32,7 @@ Define_Module(TransportTx);
 TransportTx::TransportTx()
 {
     endServiceEvent = NULL;
-    delayPkt = 0;
+    isNetworkSaturated = false;
 }
 
 TransportTx::~TransportTx()
@@ -69,13 +69,21 @@ void TransportTx::handleMessage(cMessage *msg)
 
         // FIXME: borrar en algun momento estos prints:
         // EV << "TX: IsBufferSaturated: " << (feedbackPkt->getIsBufferSaturated() ? "True" : "False") << endl;
+
+        // Si nos llega un feedback avisando que se saturó algun buffer, dejamos de enviar paquetes:
         if (feedbackPkt->getIsBufferSaturated())
         {
-            delayPkt += 1;
+            isNetworkSaturated = true;
         }
         else
         {
-            delayPkt = 0;
+            // Si ingresa aca significa que estan todos los buffers libres,
+            // por lo que podemos seguir enviando paquetes:
+        if (isNetworkSaturated)
+            {
+                scheduleAt(simTime() + 0, endServiceEvent);
+                isNetworkSaturated = false;
+            }
         }
 
         delete (msg);
@@ -83,7 +91,7 @@ void TransportTx::handleMessage(cMessage *msg)
     else if (msg == endServiceEvent)
     {
         // if packet in buffer, send next one
-        if (!buffer.isEmpty())
+        if (!buffer.isEmpty() && !isNetworkSaturated)
         {
             // dequeue packet
             cPacket *pkt = (cPacket *)buffer.pop();
@@ -91,7 +99,7 @@ void TransportTx::handleMessage(cMessage *msg)
             send(pkt, "toOut$o");
             // start new service
             serviceTime = pkt->getDuration();
-            scheduleAt(simTime() + serviceTime + delayPkt, endServiceEvent);
+            scheduleAt(simTime() + serviceTime, endServiceEvent);
         }
     }
     else
