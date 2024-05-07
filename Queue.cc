@@ -16,6 +16,7 @@ private:
     simtime_t serviceTime;
     cOutVector bufferSizeVector;
     cOutVector packetDropVector;
+    cOutVector feedbackVector;
 
 public:
     Queue();
@@ -54,6 +55,10 @@ void Queue::initialize()
     // Inicializar packetDropVector si es necesario
     packetDropVector.setName("PacketDropVector");
     packetDropVector.record(0); // Inicializar con 0, si no hay descartes al inicio de la simulación
+
+    // Inicializar feedbackVector si es necesario
+    feedbackVector.setName("FeedbackVector");
+    feedbackVector.record(0); // Inicializar con 0, si no hay feedbacks al inicio de la simulación
 }
 
 void Queue::finish()
@@ -102,6 +107,7 @@ void Queue::handleMessage(cMessage *msg)
                 {
                     isBufferSaturated = true;
                     sendFeedbackPkt(isBufferSaturated);
+                    feedbackVector.record(1);
                 }
             }
             else
@@ -112,6 +118,7 @@ void Queue::handleMessage(cMessage *msg)
                 {
                     isBufferSaturated = false;
                     sendFeedbackPkt(isBufferSaturated);
+                    feedbackVector.record(0);
                 }
             }
         }

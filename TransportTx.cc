@@ -15,7 +15,7 @@ private:
     simtime_t serviceTime;
     cOutVector bufferSizeVector;
     cOutVector packetDropVector;
-    cOutVector receiveAckVector;
+    cOutVector receiveFeedbackVector;
 
 public:
     TransportTx();
@@ -52,8 +52,8 @@ void TransportTx::initialize()
     packetDropVector.setName("PacketDropVector");
     packetDropVector.record(0); // Inicializar con 0
 
-    receiveAckVector.setName("PacketDropVector");
-    receiveAckVector.record(0); // Inicializar con 0
+    receiveFeedbackVector.setName("ReceiveFeedbackVector");
+    receiveFeedbackVector.record(0); // Inicializar con 0
 }
 
 void TransportTx::finish()
@@ -74,16 +74,18 @@ void TransportTx::handleMessage(cMessage *msg)
         if (feedbackPkt->getIsBufferSaturated())
         {
             isNetworkSaturated = true;
+            receiveFeedbackVector.record(1);
         }
         else
         {
             // Si ingresa aca significa que estan todos los buffers libres,
             // por lo que podemos seguir enviando paquetes:
-        if (isNetworkSaturated)
+            if (isNetworkSaturated)
             {
                 scheduleAt(simTime() + 0, endServiceEvent);
                 isNetworkSaturated = false;
             }
+            receiveFeedbackVector.record(0);
         }
 
         delete (msg);
