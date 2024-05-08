@@ -3,3 +3,10 @@ out/*
 ./Makefile
 lab3-kickstarter
 .qtenvrc
+FeedbackPkt_m.h
+FeedbackPkt_m.cc
+lab3Redes
+*.anf
+*.sca
+*.vci
+*.vec
