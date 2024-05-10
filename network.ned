@@ -11,7 +11,8 @@ simple Generator
 simple Queue
 {
     parameters:
-        double bufferCota; 
+        double bufferCota;        // porcentaje 
+        double serviceTime;       // sec
         volatile int bufferSize;  // cant packets
         @display("i=block/queue;q=buffer");
     gates:
@@ -30,7 +31,7 @@ simple Sink
 simple TransportTx 
 {
     parameters:
-        int bufferSize;
+        int bufferSize; // cant packets
         @display("i=block/queue;q=buffer");
     gates: 
         input toApp;
@@ -41,8 +42,8 @@ simple TransportTx
 simple TransportRx 
 {
     parameters:
-        double bufferCota;
-        int bufferSize;
+        double bufferCota; // porcentaje
+        int bufferSize;    // cant packets
         @display("i=block/queue;q=buffer");
     gates:
         output toApp;
@@ -132,16 +133,10 @@ network Network
         //-------------------------------- LA VUELTA ------------------------------------------//
 
         //Enlaces desde nodeRx.in --> queue1.in:
-        // - case study 1:
-        nodeRx.in$o --> { datarate = 1Mbps; delay = 100us; } --> queue1.in;
-        // - case study 2:
-        // nodeRx.in$o --> { datarate = 0.5Mbps; delay = 100us; } --> queue1.in;
-        // - case study 3 (creado por nosotros):
-        // nodeRx.in$o --> { datarate = 1Mbps; delay = 100us; } --> queue1.in;
-        
+        nodeRx.in$o --> queue1.in;
         
         //Enlace desde queue1.out --> nodeTx.in:
-        queue1.out --> { datarate = 1Mbps; delay = 100us; } --> nodeTx.out$i; 
+        queue1.out --> nodeTx.out$i; 
 
         //------------------------------------------------------------------------------------//
 }

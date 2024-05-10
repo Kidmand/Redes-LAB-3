@@ -13,7 +13,6 @@ private:
     bool isBufferSaturated;
     bool isNetworkSaturated;
     cMessage *endServiceEvent;
-    simtime_t serviceTime;
     cOutVector bufferSizeVector;
     cOutVector packetDropVector;
     cOutVector sendFeedbackPktVector;
@@ -68,9 +67,17 @@ void TransportRx::sendFeedbackPkt(bool isBufferSaturated)
 {
     // Create FeedbackPkt:
     FeedbackPkt *feedbackPkt = new FeedbackPkt();
-    feedbackPkt->setByteLength(20);
+
+    // Usamos este tamaño debido a que FeedbackPkt tiene simplemente un campo booleano.
+    feedbackPkt->setByteLength(1);
+
+    // Establecemos el tipo de mensaje a 2, para indicar que es un FeedbackPkt.
     feedbackPkt->setKind(2);
+
+    // Establecemos el valor de isBufferSaturated en el FeedbackPkt.
     feedbackPkt->setIsBufferSaturated(isBufferSaturated);
+
+    // Enviamos el FeedbackPkt por la salida correspondiente.
     send(feedbackPkt, "toOut$o");
 }
 
@@ -95,9 +102,9 @@ void TransportRx::handleMessage(cMessage *msg)
             cPacket *pkt = (cPacket *)buffer.pop();
             // send packet
             send(pkt, "toApp");
+
             // start new service
-            serviceTime = pkt->getDuration();
-            scheduleAt(simTime() + serviceTime, endServiceEvent);
+            scheduleAt(simTime() + pkt->getDuration(), endServiceEvent);
 
             // Manejo de FeedbackPkt:
             isBufferSaturated = isActuallBufferSatured();

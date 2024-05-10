@@ -69,10 +69,17 @@ void Queue::sendFeedbackPkt(bool isBufferSaturated)
 {
     // Create FeedbackPkt:
     FeedbackPkt *feedbackPkt = new FeedbackPkt();
-    feedbackPkt->setByteLength(20);
+
+    // Usamos este tamaño debido a que FeedbackPkt tiene simplemente un campo booleano.
+    feedbackPkt->setByteLength(1);
+
+    // Establecemos el tipo de mensaje a 2, para indicar que es un FeedbackPkt.
     feedbackPkt->setKind(2);
 
+    // Establecemos el valor de isBufferSaturated en el FeedbackPkt.
     feedbackPkt->setIsBufferSaturated(isBufferSaturated);
+
+    // Lo colocamos en la cola de salida para que se envie en el siguiente ciclo.
     buffer.insertBefore(buffer.front(), feedbackPkt);
 }
 
@@ -95,8 +102,8 @@ void Queue::handleMessage(cMessage *msg)
             // send packet
             send(pkt, "out");
             // start new service
-            serviceTime = pkt->getDuration();
-            scheduleAt(simTime() + serviceTime, endServiceEvent);
+            serviceTime = par("serviceTime");
+            scheduleAt(simTime() + serviceTime + pkt->getDuration(), endServiceEvent);
 
             // Verificar si el buffer está saturado y  enviamos el feedback correspondiente:
             if (isActuallBufferSatured())

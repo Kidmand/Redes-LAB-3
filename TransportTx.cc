@@ -12,7 +12,6 @@ private:
     bool isNetworkSaturated;
     cQueue buffer;
     cMessage *endServiceEvent;
-    simtime_t serviceTime;
     cOutVector bufferSizeVector;
     cOutVector packetDropVector;
     cOutVector receiveFeedbackVector;
@@ -100,8 +99,7 @@ void TransportTx::handleMessage(cMessage *msg)
             // send packet
             send(pkt, "toOut$o");
             // start new service
-            serviceTime = pkt->getDuration();
-            scheduleAt(simTime() + serviceTime, endServiceEvent);
+            scheduleAt(simTime() + pkt->getDuration(), endServiceEvent);
         }
     }
     else
