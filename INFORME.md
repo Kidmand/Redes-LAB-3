@@ -68,14 +68,14 @@ Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abs
 - **NodeTx**: Modulo que genera paquetes, compuesto de:
 
   - **Generador**: Genera paquetes.
-  - **Queue**: Buffer que almacena paquetes.
+  - **Queue**: Buffer que almacena paquetes. (tamaño 200pkt)
 
 - **NodeRx**: Modulo que recibe paquetes, compuesto de:
 
-  - **Queue**: Buffer que almacena paquetes.
+  - **Queue**: Buffer que almacena paquetes. (tamaño 200pkt)
   - **Sink**: Consumidor de paquetes.
 
-- **Queue**: Nodo intermedio que recibe paquetes, los almacena en un buffer, procesa y reenvia.
+- **Queue**: Nodo intermedio que recibe paquetes, los almacena en un buffer (tamaño 200pkt), procesa y reenvia.
 
 Luego tenemos los siguientes enlaces que conectan los nodos en la red:
 
@@ -103,8 +103,14 @@ Ejecutamos la simulación durante `200s` para cada caso y obtuvimos las siguient
 
 En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
-Analizando  la grafica, podemos ver que el buffer
-**Caso de estudio 2**
+![Ocupación de buffers parte 1 - caso 1](/GRAFICAS/buffers-parte1-caso1.png)
+
+Analizando la gráfica, podemos notar tres cosas:
+
+- El buffer de **NodeTx** varia a lo largo del tiempo debido a que el generador de paquetes envía paquetes a una tasa definida por `exponential(10ms)` esto es mas rápido de lo que su queue puede enviarlos. Notar que nunca supera los 200 paquetes por lo tanto no descarta paquetes por falta de espacio.
+- El buffer **intermedio Nx** se mantiene constante en `1` debido a que recibe paquetes a la misma tasa que los envía. (ie `1Mbps`). Nuevamente no descarta paquetes por falta de espacio.
+- El buffer de **NodeRx** es particular, ya que podemos ver como su buffer va creciendo de forma linea y luego se mantiene constante en `200` paquetes, esto pasa porque empezó a descartar paquetes por falta de espacio. Esto se debe a que hay un **cuello de botella** en el enlace entre **NodeRx.queue** y **Sink**. Recibe paquetes a una tasa de `1Mbps` pero solo puede enviarlos a `0.5Mbps`.
+  **Caso de estudio 2**
 
 <!--
 En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANALISIS:
