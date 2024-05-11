@@ -1,55 +1,119 @@
-# <!-- TIITULO DEL PROYECTO -->
-
-<!--
-Una linea que resuma todo:
-Ej:
-- "Analisis de flujo y congestion en redes utilizando simulacion discreta y un protocolo"
-- "Protocolo para control de congestion y flujo de redes en simulacion discreta"
--->
+# Análisis de flujo y congestion en redes utilizando simulación discreta y un protocolo.
 
 ## Resumen:
 
-<!--
-Un parrafo (o dos) resumindo la totalida del trabajo y sus resultados.
+En este trabajo se analiza el tráfico de red bajo tasas de datos acotadas y tamaño de buffers limitados.
+Con el fin de diseñar y proponer soluciones de control de congestión y flujo sobre modelos de red, utilizando simulación discreta con la herramienta Omnet++, bajo el lenguaje c++.
+Para ello diseñamos un protocolo de control de flujo y congestión inspirándonos en la sencillez para mantener la eficiencia de la red y la complejidad algorítmica.
+Obtenemos conclusiones mediante gráficos y el modelo de red en base a los datos obtenidos de la simulación.
 
-Tenemos que describir un poco para que el lector tenga una pantallaso general de lo que se va a encontrar en nuestor trabajo.
-Ej:
-- Presentamos el problema a trabajar.
-- De que manera lo vamos a trabajar.
-- Pequeña idea de propuesta de solucion que queremos hacer.
-- Opcional adelantr algunos reultados provisorios.
+## Introducción:
+
+<!--
+- Definir el problema y contextualizar al lector con definiciones básicas.
+    + Ej: "Nosotros en las redes vamos a encontrar tal y tal problema ...
+           , el flujo esta tal cosa, la congestion tal otra ..."
 -->
 
-## Introduccion:
+Trabajamos con redes, las cuales son una abstracción de nodos interconectados e intercomunicados a traves de sus conexiones, utilizadas para transmitir datos entre diferentes puntos de la misma. Donde los datos se transmiten en paquetes.
+
+Las redes están formadas por distintos tipos de nodos que:
+
+- Generan paquetes (generadores).
+- Retransmiten/procesan paquetes.
+- Consumen paquetes (sumidero).
+
+<!-- FIXME: agregar img de eso -->
+
+El principal objetivo de una red es transmitir paquetes de un punto a otro. Pero al analizar distintos casos de estudio, podemos darnos cuenta de un problema, se pierden paquetes y nunca llegan a destino.
+
+Los enlaces que conectan nodos tienen velocidades limitadas, donde algunos tienen tiempos de procesamiento por paquete por lo que necesitan buffers de algún tamaño para guardarlos y no perderlos. Sumado a esto, el nodo generador también tiene una tasa de generación de paquetes.
+Estas variables son las que al cambiar pueden producir que se pierdan paquetes. Podemos subdividir este problema cuando no controlas las siguientes partes:
+
+- **Congestion**: Cuando hay demasiados paquetes presentes en una red (o en una parte de ella) para la capacidad de los buffers generando que se pierdan algunos.
+
+- **Flujo**: Se da cuando el emisor envía paquetes a una velocidad mayor a la que el receptor puede aceptarlos, generando una saturación en el receptor, lo cual puede provocar nuevamente pérdida de paquetes.
+
+Para lograrlo, diseñaremos un protocolo. Los protocolos son conjuntos de reglas de comunicación, que en nuestro caso permitirán controlar el flujo y la congestión en la red para evitar la perdida de paquetes.
 
 <!--
-Partes:
-- Definir el problema y contextualizar al lector con definiciones basicas.
-    + Ej: "Nostros en las redes vamos a encontrar tal y tal problema ...
-           , el flujo esta tal cosa, la congestion tal otra ..."
+Describir el estado del arte. (trabajos previos) + Ej: "En la actualidad se han propuesto varios protocolos para controlar la congestion y flujo en redes, como TCP, ..."
+-->
 
-- Describir el estado del arte. (trabajos previos)
-    + Ej: "En la actualidad se han propuesto varios protocolos para controlar la congestion y flujo en redes, como TCP, UDP, ..."
+En la actualidad se han propuesto varios protocolos para controlar la congestion y flujo en redes. Por ejemplo, TCP el cual garantiza que el receptor reciba todos los paquetes enviados desde el emisor, pero para lograrlo permite perdida de paquetes, ¿como soluciona esto? revisándolos.
+Algunos intentan solucionar este problema evitando que se pierdan de ninguna forma, esto lo hacen con paquetes de control para no saturar ningún buffer de la red.
+Otros implementan una mezcla de ambos, para garantizar la entrega de paquetes y evitar la saturación de buffers.
 
+<!--
 - Metodologia de trabajo.
     + Ej: "Nosotros vamos a trabajar con simulacion discreta, que es ...
            y emplearems un protocolo que vamos a proponer, para analizar el flujo y congestion en redes ..."
+-->
 
-- Presentacion de nuestros casos de estudio.
+Para trabajar sobre redes utilizamos el simulador de eventos discretos **(Omnet++)**. Elegimos esta herramienta ya que nos permite previsualizar la red y el efecto del diseño de nuestros protocolos en ella, cosa que no se podría ver con la misma facilidad en la vida real sobre una red física existente. Por ejemplo, nos permite controlar los tiempos y demás variables de la red.
+
+<!--
+- Presentación de nuestros casos de estudio.
    + Explicar caso 1: su ventaja, problemas, etc.
    + Explicar caso 2: su ventaja, problemas, etc.
    + Obs: Incluir las primeras graficas de la parte 1, con las conculciones y problemas que encontramos osea interpretarlas (ej, aca podemos ver que los paquetes, buffers, paquetes enviado, tal y tal cosa ...)
+-->
 
+Para empezar a ver los problemas de congestión y el control de flujo así como también ver la manera en la que nuestro protocolo funciona,
+tenemos dos casos de estudios para poder analizar más en detalle las cosas explicadas anteriormente.
+
+**Caso de estudio 1**
+En e
+○ NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
+○ Queue a NodeRx: datarate = 1 Mbps y delay = 100 us
+○ Queue a Sink: datarate = 0.5 Mbps
+
+**Caso de estudio 2**
+○ NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
+○ Queue a NodeRx: datarate = 0.5 Mbps y delay = 100 us
+○ Queue a Sink: datarate = 1 Mbps
+
+<!-- FIXME: A
+regar imagen del network-->
+
+Para empezar, notemos que tenemos definidos los nodos del network con los nombres **(NodeTx)**, **(NodeRx)**, los cuales nos van a permitir enviar y recibir datos, a su vez disponemos de bufferes **(queue0)**, **(queue1)** que serán los encargados de almacenar los paquete mediante vayan llegando desde **NodeTx** hacia **queue0** para luego ser envidados hacia **NodeRx**.
+Notar que estos nodos tienen bufferes **queue** en sus implementaciones, pero estaría de manera implicita en la imagen del network dado que no podemos veer la implementación de los nodos.
+
+A continuación les mostramos de manera sintática cuántos datos pueden enviarse desde los nodos hacia los bufferes.
+Por ejemplo, en el primer caso vemos que la conexión entre **NodeTx** ----> **queue0** representa una conexión de transmisión de 1Mbps y con un
+tiempo de transmisión **(RTT)** representado por **delay** que en este caso son **100us** (microsegundos).
+Desde el **queue** -----> **NodeRx** vemos una transmisión de 1Mbps con **RTT**(tiempo de transmisión) igual que el anterior **100us**(microsegundos)
+
+Para entender esto contextualicemos un poco. Es decir que el **queue0** recibe datos a una velocidad de trasnferencia de 1Mbps y envia los datos/paquetes recibido a una taza de 1Mbps, por lo que en principio no hay paquete que se almacenen en el buffer dado que la velocidad de recibir y enviar es la misma.
+En cambio en el buffer interno que como dijimos antes está declarado de manera implicita dentro del nodo **NodeRx** dicho buffer le envia datos a una velocidad de trasnferencia de 0.5Mbps ocurriendo así lo que se conoce en redes un **CUELLO DE BOTELLA**:
+
+- NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
+- Queue a NodeRx: datarate = 1 Mbps y delay = 100 us
+- Queue a Sink: datarate = 0.5 Mbps
+
+- Ventajas:
+- Ventajas:
+
+- Desventajas:
+
+**Caso de estudio 2**
+
+- Ventajas
+- Desventajas
+
+<!--
 En el encunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANALISIS:
 - ¿Qué diferencia observa entre el caso de estudio 1 y 2?
 - ¿Cuál es la fuente limitante en cada uno?
 - Investigue sobre la diferencia entre control de flujo y control de congestión (ver Figura 6-22 del libro Tanenbaum).
 -->
 
-## Metodos:
+## Métodos:
+
+UMBRAL && ESPERA
 
 <!--
-Una seccion que describir nuestra propuesta de solución:
+Una sección que describir nuestra propuesta de solución:
 - Describimos el algoritmo.
 - Como llegamos a esa idea.
 - Una pequeña hipotesis de porque creemos que va a funcionar.
