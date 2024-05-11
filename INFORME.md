@@ -23,7 +23,7 @@ Las redes están formadas por distintos tipos de nodos que:
 - Retransmiten/procesan paquetes.
 - Consumen paquetes (sumidero).
 
-<!-- FIXME: agregar img de eso -->
+![Red Básica](/IMGs/red-basica.png)
 
 El principal objetivo de una red es transmitir paquetes de un punto a otro. Pero al analizar distintos casos de estudio, podemos darnos cuenta de un problema, se pierden paquetes y nunca llegan a destino.
 
@@ -79,12 +79,13 @@ Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abs
 
 Luego tenemos los siguientes enlaces que conectan los nodos en la red:
 
- <!-- FIXME: Agregar imagen de la RED. -->
+![Red parte 1](/IMGs/red-parte1.png)
 
 Pero internamente **NodeTx** y **NodeRx** tienen los siguientes enlaces:
 
- <!-- FIXME: Agregar imagen de NODETX y  NODERX con su buffer interno. -->
+![NodeTx parte 1](/IMGs/NodeTx-parte1.png)
 
+![NodeRx parte 1](/IMGs/NodeRx-parte1.png)
 Los casos de estudio son:
 
 - Caso 1:
