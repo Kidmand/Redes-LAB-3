@@ -59,50 +59,53 @@ Para trabajar sobre redes utilizamos el simulador de eventos discretos **(Omnet+
    + Obs: Incluir las primeras graficas de la parte 1, con las conculciones y problemas que encontramos osea interpretarlas (ej, aca podemos ver que los paquetes, buffers, paquetes enviado, tal y tal cosa ...)
 -->
 
-Para empezar a ver los problemas de congestión y el control de flujo así como también ver la manera en la que nuestro protocolo funciona,
-tenemos dos casos de estudios para poder analizar más en detalle las cosas explicadas anteriormente.
+Para empezar a ver los problemas de congestión y el control de flujo así como también ver la manera en la que nuestro protocolo funciona, tenemos dos casos de estudios para poder analizar más en detalle las cosas explicadas anteriormente.
+
+En los diferentes casos de estudio van a cambiar las tasas de transferencia de datos en los distintos enlaces generando el fenómeno **cuello de botella**. Es decir que nos encontramos un enlace con menor tasa de transferencia que el resto de los enlaces de la red, lo que genera que se pierdan paquetes.
+
+Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abstracta) de estudio:
+
+- **NodeTx**: Modulo que genera paquetes, compuesto de:
+
+  - **Generador**: Genera paquetes.
+  - **Queue**: Buffer que almacena paquetes.
+
+- **NodeRx**: Modulo que recibe paquetes, compuesto de:
+
+  - **Queue**: Buffer que almacena paquetes.
+  - **Sink**: Consumidor de paquetes.
+
+- **Queue**: Nodo intermedio que recibe paquetes, los almacena en un buffer, procesa y reenvia.
+
+Luego tenemos los siguientes enlaces que conectan los nodos en la red:
+
+ <!-- FIXME: Agregar imagen de la RED. -->
+
+Pero internamente **NodeTx** y **NodeRx** tienen los siguientes enlaces:
+
+ <!-- FIXME: Agregar imagen de NODETX y  NODERX con su buffer interno. -->
+
+Los casos de estudio son:
+
+- Caso 1:
+  - NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
+  - Queue a NodeRx: datarate = 1 Mbps y delay = 100 us
+  - NodeRx.queue a Sink: datarate = 0.5 Mbps
+- Caso de estudio 2:
+  - NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
+  - Queue a NodeRx: datarate = 0.5 Mbps y delay = 100 us
+  - NodeRx.queue a Sink: datarate = 1 Mbps
+
+Ejecutamos la simulación durante `200s` para cada caso y obtuvimos las siguientes conclusiones:
 
 **Caso de estudio 1**
-En e
-○ NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
-○ Queue a NodeRx: datarate = 1 Mbps y delay = 100 us
-○ Queue a Sink: datarate = 0.5 Mbps
+
+En la siguiente gráfica podemos se muestra los paquetes descartados por la **NodeRx.queue** en comparación del tiempo:
 
 **Caso de estudio 2**
-○ NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
-○ Queue a NodeRx: datarate = 0.5 Mbps y delay = 100 us
-○ Queue a Sink: datarate = 1 Mbps
-
-<!-- FIXME: A
-regar imagen del network-->
-
-Para empezar, notemos que tenemos definidos los nodos del network con los nombres **(NodeTx)**, **(NodeRx)**, los cuales nos van a permitir enviar y recibir datos, a su vez disponemos de bufferes **(queue0)**, **(queue1)** que serán los encargados de almacenar los paquete mediante vayan llegando desde **NodeTx** hacia **queue0** para luego ser envidados hacia **NodeRx**.
-Notar que estos nodos tienen bufferes **queue** en sus implementaciones, pero estaría de manera implicita en la imagen del network dado que no podemos veer la implementación de los nodos.
-
-A continuación les mostramos de manera sintática cuántos datos pueden enviarse desde los nodos hacia los bufferes.
-Por ejemplo, en el primer caso vemos que la conexión entre **NodeTx** ----> **queue0** representa una conexión de transmisión de 1Mbps y con un
-tiempo de transmisión **(RTT)** representado por **delay** que en este caso son **100us** (microsegundos).
-Desde el **queue** -----> **NodeRx** vemos una transmisión de 1Mbps con **RTT**(tiempo de transmisión) igual que el anterior **100us**(microsegundos)
-
-Para entender esto contextualicemos un poco. Es decir que el **queue0** recibe datos a una velocidad de trasnferencia de 1Mbps y envia los datos/paquetes recibido a una taza de 1Mbps, por lo que en principio no hay paquete que se almacenen en el buffer dado que la velocidad de recibir y enviar es la misma.
-En cambio en el buffer interno que como dijimos antes está declarado de manera implicita dentro del nodo **NodeRx** dicho buffer le envia datos a una velocidad de trasnferencia de 0.5Mbps ocurriendo así lo que se conoce en redes un **CUELLO DE BOTELLA**:
-
-- NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
-- Queue a NodeRx: datarate = 1 Mbps y delay = 100 us
-- Queue a Sink: datarate = 0.5 Mbps
-
-- Ventajas:
-- Ventajas:
-
-- Desventajas:
-
-**Caso de estudio 2**
-
-- Ventajas
-- Desventajas
 
 <!--
-En el encunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANALISIS:
+En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANALISIS:
 - ¿Qué diferencia observa entre el caso de estudio 1 y 2?
 - ¿Cuál es la fuente limitante en cada uno?
 - Investigue sobre la diferencia entre control de flujo y control de congestión (ver Figura 6-22 del libro Tanenbaum).
