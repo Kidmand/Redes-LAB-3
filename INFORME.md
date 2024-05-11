@@ -101,8 +101,9 @@ Ejecutamos la simulación durante `200s` para cada caso y obtuvimos las siguient
 
 **Caso de estudio 1**
 
-En la siguiente gráfica podemos se muestra los paquetes descartados por la **NodeRx.queue** en comparación del tiempo:
+En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
+Analizando  la grafica, podemos ver que el buffer
 **Caso de estudio 2**
 
 <!--
