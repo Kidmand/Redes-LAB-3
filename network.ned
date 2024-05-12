@@ -65,7 +65,6 @@ module NodeTx
             parameters: 
                 @display("p=75,190");
         }
-        
     connections:
         gen.out --> traTx.toApp;
         traTx.toOut <--> out; 
