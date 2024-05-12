@@ -141,26 +141,24 @@ Claramente se ve como la única queue que descarta paquetes es la de **NodeNx** 
 En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANÁLISIS:
 - ¿Qué diferencia observa entre el caso de estudio 1 y 2?
 - ¿Cuál es la fuente limitante en cada uno?
--- FIXME: Completen también con imágenes (están en el tanembaun).
 - Investigue sobre la diferencia entre control de flujo y control de congestión (ver Figura 6-22 del libro Tanenbaum).
 -->
 
-El control de flujo y el control de congestión son dos conceptos fundamentales en redes de computadoras que se relacionan con la administración del tráfico de datos, pero tienen objetivos y enfoques diferentes:
+El control de flujo y el control de congestión son dos conceptos fundamentales en redes de computadoras que se relacionan con la administración del tráfico de datos, pero tienen objetivos y enfoques diferentes, veamos una imagen representativa de esto y analicemos la diferencia entre ambos conceptos:
+
+![Control de flujo y congestión](/IMGs/congestion-y-flujo.jpeg){width=auto height=400}
 
 **Control de flujo:**
 
-- El control de flujo se refiere a la gestión de la velocidad de transferencia de datos entre dos puntos en una red para garantizar que el receptor
-  no se sature con más datos de los que puede manejar.
+- El control de flujo se refiere a la gestión de la velocidad de transferencia de datos entre dos puntos en una red para garantizar que el receptor no se sature con más datos de los que puede manejar.
 - Se ocupa de asegurar que el emisor no envíe más datos de los que el receptor puede procesar o almacenar temporalmente en su búfer.
 - El objetivo principal del control de flujo es garantizar la eficiencia y la fiabilidad en la transmisión de datos, evitando la congestión en la red.
 
 **Control de congestión:**
 
 - El control de congestión se refiere a la gestión del tráfico de datos en una red para evitar la saturación de los recursos de la red y la degradación del rendimiento.
-- Se ocupa de evitar que se produzcan situaciones en las que la capacidad de la red se vea superada por la cantidad de datos que se están transmitiendo,
-  lo que podría llevar a la pérdida de paquetes, la retransmisión excesiva y la congestión en la red.
-- El objetivo principal del control de congestión es garantizar un uso eficiente de los recursos de red y mantener un rendimiento óptimo, evitando la saturación
-  y el colapso de la red.
+- Se ocupa de evitar que se produzcan situaciones en las que la capacidad de la red se vea superada por la cantidad de datos que se están transmitiendo, lo que podría llevar a la pérdida de paquetes, la retransmisión excesiva y la congestión en la red.
+- El objetivo principal del control de congestión es garantizar un uso eficiente de los recursos de red y mantener un rendimiento óptimo, evitando la saturación y el colapso de la red.
 
 En resumen, mientras que el control de flujo se centra en la relación entre el emisor y el receptor para evitar que el receptor se sobrecargue, el control de congestión se centra en la gestión del tráfico de datos en toda la red para evitar la saturación de los recursos de la red.
 
