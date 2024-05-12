@@ -150,22 +150,22 @@ UMBRAL && ESPERA
 Una sección que describir nuestra propuesta de solución:
 - Describimos el algoritmo.
 - Como llegamos a esa idea.
-- Una pequeña hipotesis de porque creemos que va a funcionar.
+- Una pequeña hipótesis de porque creemos que va a funcionar.
 -->
 
 ## Resultados:
 
 <!--
-- Una seccion que detalla los resultados de los algoritmos diseñados con graficos tanto para el caso 1 y caso 2.
-- Concluciones de los resultados.
+- Una sección que detalla los resultados de los algoritmos diseñados con gráficos tanto para el caso 1 y caso 2.
+- Conclusiones de los resultados.
 
-Opcional: Si no llegamos directamente al algoritmo, se puede incluir algunas modificacion que le fuimos haciendo al algoritmo para que funcionen mejor. (Es decir algunas variables globales, parametros, que no cambia tanto codigo, etc.)
-Importante: Implementar todo el algoritmo de nuevo no se considera modificacion,  eso se ecribe en otro paper.
+Opcional: Si no llegamos directamente al algoritmo, se puede incluir algunas modificación que le fuimos haciendo al algoritmo para que funcionen mejor. (Es decir algunas variables globales, parámetros, que no cambia tanto código, etc.)
+Importante: Implementar todo el algoritmo de nuevo no se considera modificación,  eso se escribe en otro paper.
 
 (Aca podemos agregar el caso 3 nuestro y explicar porque esta bueno, etc.)
 
 
-Agregar graficos de carga ofrecida vs carga util explicada en el video:
+Agregar gráficos de carga ofrecida vs carga util explicada en el video:
 https://www.youtube.com/watch?v=W8r8zSPjeAs&feature=youtu.be
 
 El enunciado dice que hay que contestar las siguientes preguntas de la PARTE TAREA DE DISEÑO:
@@ -176,14 +176,34 @@ El enunciado dice que hay que contestar las siguientes preguntas de la PARTE TAR
 ## Discusiones:
 
 <!--
-Una seccion con los logros, limitaiones y posibles mejoras de nuestro algoritmo propuesto.
+Una sección con los logros, limitaciones y posibles mejoras de nuestro algoritmo propuesto.
 -->
 
 ## Referencias:
 
 <!--
 - Todas las referencias que usamos en el trabajo. LIBROS, PAPERS, WEB, ETC.
-(Nosotros usamos el manual de omnet++ y  quizas algo más ...).
+(Nosotros usamos el manual de omnet++ y  quizás algo más ...).
 
-Si agregamos imagenes de tanembaun para explicar algo de flujo y congestion, tambien se debe referenciar.
+Si agregamos imágenes de Tanembaun para explicar algo de flujo y congestion, también se debe referenciar.
 -->
+
+- Andrew S. Tanenbaum, David J. Wetherall, Redes de Computadoras (5ta edición 2011), Pearson.
+- Omnet++ Simulation Manual, (OMNeT++ version 6.0.3, 2020).
+
+## Anexo: Inteligencia Artificial
+
+En este anexo contamos como utilizamos las IA para desarrollo del estudio de redes.
+
+Consideramos que podemos separar en dos partes como utilizamos la IA:
+
+- **Consultar dudas conceptuales**.
+- **Complemento en la escritura de código**.
+
+### Consultar dudas conceptuales
+
+Para este tipo de consultas utilizamos principalmente **Chat Gpt 3.5**, consideramos que estas son dudas rápidas que se pueden resolver con una respuesta corta y precisa. Si vemos que el tema es muy complejo, recurrimos a **Stack Overflow** o búsquedas en general por **Google**, somos cocientes que la respuesta puede ser mas lenta pero es mas precisa, las IA a veces no responden lo que uno espera.
+
+### Complemento en la escritura de código
+
+Para esto tenemos **Github Copilot**, nos ayuda a completar código que es repetitivo o sencillo, no dejamos que nos complete todo porque siempre sale mal y terminamos borrando lo que nos sugiere. Pero para cosas como completar un `for` o un `if` nos ayuda mucho. Notamos un incremento en nuestra velocidad de escritura de código y consideramos que esto es muy bueno por eso la seguimos utilizando. Por otra parte nos planteamos, si esto nos perjudica en algo y encontramos una gran desventaja de usarlo, "nos acostumbramos", esto puede ser malo si de un dia para el otro no lo tenemos mas, quizá nos cueste mas escribir código. Por ello cada tanto la desactivamos y escribimos código a mano para no perder la costumbre.
