@@ -173,11 +173,18 @@ El algoritmo hace lo siguiente, dependiedo los casos de estudios, tenemos cotas 
 
 El funcionamineto se da a continuación:
 
-Se envian los paquetes normalmente hacia los nodos bufferes, en nuestro caso enviamos paquetes desde el nodo **TraTx** hacia **queue0**. Si la taza de transferencia entre 
-**TraTx** ----> **queue0** es igual a la taza de transferencia entre **queue0** ----> **TraRx** entonces los paquetes serán enviado mientras van llegando y por lo tanto no se almacenarán en el buffer **queue0**. Supongamos ahora que la taza de transferencia de **queue0** ----> **TraRx** es de `0.5 Mbps` y **TraTx** ----> **queue0** es de `1 Mbps` que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente. Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente, cuando  supere la cota ya sea 
-`cota1=160` o `cota2=100` nuestro algoritmo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola, que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante, cuando lo detecta enviamos un paquete hacia el buffer **queue1** que este a su vez envia el paquete a **NodeTx** diciendole que deje de enviar paquetes para evitar la saturación de los bufferes. 
-Cuando el último buffer deje superar la cota establecida, creamos un paquete que al igual que antes será enviado inmediatamente ya sea desde 
-**queue0**  si el último buffer que dejó de superar la cota fue `queue0` o directamete desde **TraRx**  si el último buffer que dejó de superar la cota es el buffer interno del nodo **TraRx**. Este paquete será enviado mediante la ruta **TraRx** ----> **queue1** ----> **TraTx** avisando que los bufferes ya no superan la cota entonces se puede continuar con la transmisión.
+- Se envian los paquetes normalmente hacia los nodos bufferes, en nuestro caso enviamos paquetes desde el nodo **TraTx** hacia **queue0**.
+- Si la taza de transferencia entre **TraTx** ----> **queue0** es igual a la taza de transferencia entre **queue0** ----> **TraRx** entonces los paquetes serán enviado mientras van llegando y por lo tanto no se almacenarán en el buffer **queue0**. 
+- Supongamos ahora que la taza de transferencia de **queue0** ----> **TraRx** es de `0.5 Mbps` y **TraTx** ----> **queue0** es de `1 Mbps` que en general es uno de nuestro caso de estudio,
+en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente.
+- Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente, cuando  supere la cota ya sea 
+`cota1=160` o `cota2=100`. 
+- Nuestro algoritmo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola,
+que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
+- Cuando lo detecta enviamos un paquete hacia el buffer **queue1** que este a su vez envia el paquete a **NodeTx** diciendole que deje de enviar paquetes para evitar la saturación de los bufferes. 
+- Cuando el último buffer deje superar la cota establecida, creamos un paquete que al igual que antes será enviado inmediatamente ya sea desde 
+**queue0**  si el último buffer que dejó de superar la cota fue `queue0` o directamete desde **TraRx**  si el último buffer que dejó de superar la cota es el buffer interno del nodo **TraRx**. 
+- Este paquete será enviado mediante la ruta **TraRx** ----> **queue1** ----> **TraTx** avisando que los bufferes ya no superan la cota entonces se puede continuar con la transmisión.
 
 Entonces en resumidas cuentas, nuestro protoclo detecta cuando los bufferes superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes
 con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detectetn que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así susecivamenet. 
