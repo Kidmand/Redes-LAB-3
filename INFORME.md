@@ -68,14 +68,14 @@ Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abs
 - **NodeTx**: Modulo que genera paquetes, compuesto de:
 
   - **Generador**: Genera paquetes.
-  - **Queue**: Buffer que almacena paquetes.
+  - **Queue**: Buffer que almacena paquetes. (tamaño 200pkt)
 
 - **NodeRx**: Modulo que recibe paquetes, compuesto de:
 
-  - **Queue**: Buffer que almacena paquetes.
+  - **Queue**: Buffer que almacena paquetes. (tamaño 200pkt)
   - **Sink**: Consumidor de paquetes.
 
-- **Queue**: Nodo intermedio que recibe paquetes, los almacena en un buffer, procesa y reenvia.
+- **Queue**: Nodo intermedio que recibe paquetes, los almacena en un buffer (tamaño 200pkt), procesa y reenvia.
 
 Luego tenemos los siguientes enlaces que conectan los nodos en la red:
 
@@ -88,11 +88,11 @@ Pero internamente **NodeTx** y **NodeRx** tienen los siguientes enlaces:
 ![NodeRx parte 1](/IMGs/NodeRx-parte1.png)
 Los casos de estudio son:
 
-- Caso 1:
+- **Caso 1**:
   - NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
   - Queue a NodeRx: datarate = 1 Mbps y delay = 100 us
   - NodeRx.queue a Sink: datarate = 0.5 Mbps
-- Caso de estudio 2:
+- **Caso 2**:
   - NodeTx a Queue: datarate = 1 Mbps y delay = 100 us
   - Queue a NodeRx: datarate = 0.5 Mbps y delay = 100 us
   - NodeRx.queue a Sink: datarate = 1 Mbps
@@ -103,11 +103,40 @@ Ejecutamos la simulación durante `200s` para cada caso y obtuvimos las siguient
 
 En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
-Analizando  la grafica, podemos ver que el buffer
+![Ocupación de buffers parte 1 - caso 1](/GRAFICAS/buffers-parte1-caso1.png)
+
+Analizando, podemos notar tres cosas:
+
+- El buffer de **NodeTx** varia mucho a lo largo del tiempo debido a que el generador de paquetes envía paquetes a una tasa definida por `exponential(10ms)` esto es mas rápido de lo que su **queue** puede enviarlos. Notar que nunca supera los `200` paquetes por lo tanto no descarta paquetes por falta de espacio.
+- El buffer **intermedio Nx** se mantiene constantemente en `1` debido a que recibe paquetes a la misma tasa que los envía. (i.e `1Mbps`). Nuevamente no descarta paquetes por falta de espacio.
+- El buffer de **NodeRx** es particular, ya que podemos ver como su buffer va creciendo de forma linea y luego se mantiene constante en `200` paquetes, esto pasa porque empezó a descartar paquetes por falta de espacio, debido a que recibe paquetes a una tasa de `1Mbps` pero solo puede enviarlos a `0.5Mbps` generando un **cuello de botella** en el enlace entre **NodeRx.queue** y **Sink**.
+
+Veamos ahora cuando y donde se descartan paquetes:
+
+![Paquetes descartados parte 1 - caso 1](/GRAFICAS/pkt-descartados-parte1-caso1.png)
+
+En la gráfica podemos ver claramente como la única parte donde se descartan paquetes es en el buffer de **NodeRx.queue**. Esto se debe justamente al **cuello de botella** que mencionamos anteriormente. Notar que el tiempo en el que se descartan paquetes es a partir de los `40s` aproximadamente y coincide con el momento en el que el buffer de **NodeRx** empieza a mantenerse constante en `200` paquetes.
+
 **Caso de estudio 2**
 
+En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
+
+![Ocupación de buffers parte 1 - caso 2](/GRAFICAS/buffers-parte1-caso2.png)
+
+Analizando, podemos compáralo con el caso anterior y notar que:
+
+- El buffer de **NodeTx** se mantiene igual que en el caso anterior debido a que la tasa de generación de paquetes es la misma y la tasa de envío también.
+- El buffer **intermedio Nx** copia el comportamiento de Rx en el anterior caso debido a que la tasa de transferencia entre Nx.queue y Rx.queue es de `0.5Mbps` mientras que los paquetes llegan a Nx.queue con una tasa de `1Mbps` generando un **cuello de botella**.
+- En el buffer **NodeRx** el comportamiento es similar al de Nx en el anterior caso, debido a que ahora recibe paquetes a una tasa de `0.5Mbps` menor que la tasa `1Mbps` de salida, evitando el cuello de botella.
+
+Veamos ahora cuando y donde se descartan paquetes:
+
+![Paquetes descartados parte 1 - caso 2](/GRAFICAS/pkt-descartados-parte1-caso2.png)
+
+Claramente se ve como la única queue que descarta paquetes es la de **NodeNx** debido a lo mencionado anteriormente. Notar que ocurre lo mismo que en el caso anterior, a partir de los `40s` aproximadamente.
+
 <!--
-En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANALISIS:
+En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANÁLISIS:
 - ¿Qué diferencia observa entre el caso de estudio 1 y 2?
 
 -- FIXME: Completar con imagenes, si explico despues me lo borran. 
