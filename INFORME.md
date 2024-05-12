@@ -139,7 +139,7 @@ Claramente se ve como la única queue que descarta paquetes es la de **NodeNx** 
 En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANÁLISIS:
 - ¿Qué diferencia observa entre el caso de estudio 1 y 2?
 
--- FIXME: Completar con imagenes, si explico despues me lo borran. 
+-- FIXME: Completar con imagenes, si explico despues me lo borran.
 
 - ¿Cuál es la fuente limitante en cada uno?
 -- FIXME: Completen también con imagenes y explicar.
@@ -150,46 +150,68 @@ En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE 
 El control de flujo y el control de congestión son dos conceptos fundamentales en redes de computadoras que se relacionan con la administración del tráfico de datos, pero tienen objetivos y enfoques diferentes:
 
 **Control de flujo:**
+
 - El control de flujo se refiere a la gestión de la velocidad de transferencia de datos entre dos puntos en una red para garantizar que el receptor
   no se sature con más datos de los que puede manejar.
 - Se ocupa de asegurar que el emisor no envíe más datos de los que el receptor puede procesar o almacenar temporalmente en su búfer.
 - El objetivo principal del control de flujo es garantizar la eficiencia y la fiabilidad en la transmisión de datos, evitando la congestión en la red.
 
 **Control de congestión:**
+
 - El control de congestión se refiere a la gestión del tráfico de datos en una red para evitar la saturación de los recursos de la red y la degradación del rendimiento.
-- Se ocupa de evitar que se produzcan situaciones en las que la capacidad de la red se vea superada por la cantidad de datos que se están transmitiendo, 
+- Se ocupa de evitar que se produzcan situaciones en las que la capacidad de la red se vea superada por la cantidad de datos que se están transmitiendo,
   lo que podría llevar a la pérdida de paquetes, la retransmisión excesiva y la congestión en la red.
-- El objetivo principal del control de congestión es garantizar un uso eficiente de los recursos de red y mantener un rendimiento óptimo, evitando la saturación 
+- El objetivo principal del control de congestión es garantizar un uso eficiente de los recursos de red y mantener un rendimiento óptimo, evitando la saturación
   y el colapso de la red.
 
 En resumen, mientras que el control de flujo se centra en la relación entre el emisor y el receptor para evitar que el receptor se sobrecargue, el control de congestión se centra en la gestión del tráfico de datos en toda la red para evitar la saturación de los recursos de la red.
 
 ## Métodos:
 
-Nuestro protocolo recibe como nombre **UMBRAL && ESPERA** ya que usamos cotas en los bufferes para evitar la pérdida de paquetes y usamos un tiempo de retardo en enviar a los paquetes una vez detectamos congestión.
+A continuación presentamos algunas modificación que se hicieron en la red:
 
-El algoritmo hace lo siguiente, dependiedo los casos de estudios, tenemos cotas para los bufferes de `80%` y `50%` del total de almacenamiento del buffer, para nuesto caso los buffer tienen un almacenamiento de `200` paquetes, Por lo tanto el `80% * Almacenamiento(200) = cota1` es decir que tenemos una cota en `160` paquetes y 
-`50% * Almacenamiento(200) = cota2` que es la otra cota en `100` paquetes. 
+![Red parte 2](/IMGs/red-parte2.png)
 
-El funcionamineto se da a continuación:
+Notar que ahora tenemos dos **queue** intermedios, pero uno es unicamente para manejar paquetes de control, que serán enviados por el protocolo que diseñamos.
 
-- Se envian los paquetes normalmente hacia los nodos bufferes, en nuestro caso enviamos paquetes desde el nodo **TraTx** hacia **queue0**.
-- Si la taza de transferencia entre **TraTx** ----> **queue0** es igual a la taza de transferencia entre **queue0** ----> **TraRx** entonces los paquetes serán enviado mientras van llegando y por lo tanto no se almacenarán en el buffer **queue0**. 
-- Supongamos ahora que la taza de transferencia de **queue0** ----> **TraRx** es de `0.5 Mbps` y **TraTx** ----> **queue0** es de `1 Mbps` que en general es uno de nuestro caso de estudio,
-en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente.
-- Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente, cuando  supere la cota ya sea 
-`cota1=160` o `cota2=100`. 
+Por otra parte también se modificaron los enlaces internos de **NodeTx** y **NodeRx**:
+
+El funcionamiento de **traTx** es similar que al de la **queue** nada mas que ahora no solo envía paquetes a **queue0** sino que también puede recibir paquetes de **queue1** y procesarlos.
+![NodeTx parte 2](/IMGs/NodeTx-parte2.png)
+
+El funcionamiento de **traRx** es similar que al de la **queue** nada mas que ahora no solo recibe paquetes de **queue0** sino que también puede enviar paquetes a **queue1** de control.
+![NodeRx parte 2](/IMGs/NodeRx-parte2.png)
+
+Nuestro protocolo recibe como nombre **UMBRAL && ESPERA** ya que usamos cotas en los buffers para evitar la pérdida de paquetes y creamos un tipo de paquetes para el control encargado de avisar al emisor que deje de enviar paquetes.
+
+El algoritmo hace lo siguiente, dependiendo los casos de estudio, tenemos cotas para los buffers de `80%` y `50%` del total de almacenamiento del mismo, para nuestro caso los buffer tienen un almacenamiento de `200` paquetes, Por lo tanto el `80% * Almacenamiento(200) = cota1` es decir que tenemos una cota en `160` paquetes, análogamente para la cota de `50%`.
+
+El funcionamiento se da a continuación:
+
+- Se envían los paquetes normalmente hacia los nodos, en nuestro caso enviamos paquetes desde el nodo **TraTx** hacia **queue0**.
+
+Notar que en nuestra red podemos tener dos situaciones de cuello de botella:
+
+- Que se sature el buffer **queue0**.
+- Que se sature el buffer de **NodeRx.traRx**.
+
+Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos, esto lo logramos revisando que no se supere la cota.
+
+<!-- FIXME: Explicar que el nodeRX ENVÍA TODO EL TIEMPO EL ESTADO DE LA RED. -->
+
+- Si la taza de transferencia entre **TraTx** ----> **queue0** es igual a la taza de transferencia entre **queue0** ----> **TraRx** entonces los paquetes serán enviado mientras van llegando y por lo tanto no se almacenarán en el buffer **queue0**.
+- Supongamos ahora que la taza de transferencia de **queue0** ----> **TraRx** es de `0.5 Mbps` y **TraTx** ----> **queue0** es de `1 Mbps` que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente.
+- Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente, cuando supere la cota ya sea
+  `cota1=160` o `cota2=100`.
 - Nuestro algoritmo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola,
-que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
-- Cuando lo detecta enviamos un paquete hacia el buffer **queue1** que este a su vez envia el paquete a **NodeTx** diciendole que deje de enviar paquetes para evitar la saturación de los bufferes. 
-- Cuando el último buffer deje superar la cota establecida, creamos un paquete que al igual que antes será enviado inmediatamente ya sea desde 
-**queue0**  si el último buffer que dejó de superar la cota fue `queue0` o directamete desde **TraRx**  si el último buffer que dejó de superar la cota es el buffer interno del nodo **TraRx**. 
+  que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
+- Cuando lo detecta enviamos un paquete hacia el buffer **queue1** que este a su vez envia el paquete a **NodeTx** diciendole que deje de enviar paquetes para evitar la saturación de los bufferes.
+- Cuando el último buffer deje superar la cota establecida, creamos un paquete que al igual que antes será enviado inmediatamente ya sea desde **queue0** si el último buffer que dejó de superar la cota fue `queue0` o directamete desde **TraRx** si el último buffer que dejó de superar la cota es el buffer interno del nodo **TraRx**.
 - Este paquete será enviado mediante la ruta **TraRx** ----> **queue1** ----> **TraTx** avisando que los bufferes ya no superan la cota entonces se puede continuar con la transmisión.
 
 Entonces en resumidas cuentas, nuestro protoclo detecta cuando los bufferes superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes
-con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detectetn que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así susecivamenet. 
-Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulacón, nuestro protocolo se establecerá en un valor fijo de paquete que se envia y paquetes almacenados en los bufferes como pueden ver en las imagenes siguientes. 
-
+con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detectetn que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así susecivamenet.
+Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulacón, nuestro protocolo se establecerá en un valor fijo de paquete que se envia y paquetes almacenados en los bufferes como pueden ver en las imagenes siguientes.
 
 <!--
 Una sección que describir nuestra propuesta de solución:
