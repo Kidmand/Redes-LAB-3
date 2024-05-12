@@ -229,9 +229,7 @@ Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el c
 - Para el caso 2, el buffer interno de **NodeRx** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
 Entonces en resumidas cuentas, nuestro protocolo detecta cuando los buffers superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes con lo cual los paquetes del emisor irán almacenándose en su buffer interno, cuando se detecte que todos los buffers ya no superan las cotas, entonces se envía nuevamente un paquete al emisor avisándole que puede restablecer el envió de los paquetes y así sucesivamente.
-Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulación, nuestro protocolo se establecerá en un valor fijo de paquete que se envía y paquetes almacenados en los buffers como pueden ver en las imágenes siguientes:
-
-![Ocupación de buffers parte 2 - caso 1](/GRAFICAS/buffers-parte2-caso1.png){width=auto height=500} ![Ocupación de buffers parte 2 - caso 2](/GRAFICAS/buffers-parte2-caso2.png){width=auto height=500}
+Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulación, nuestro protocolo se establecerá en un valor fijo de paquete que se envía y paquetes almacenados en los buffers esto lo visualizaremos en la parte de resultados.
 
 ### Como llegamos a las ideas para la implementación de nuestro protocolo.
 
@@ -267,6 +265,41 @@ https://www.youtube.com/watch?v=W8r8zSPjeAs&feature=youtu.be
 El enunciado dice que hay que contestar las siguientes preguntas de la PARTE TAREA DE DISEÑO:
 - ¿Cómo cree que se comporta su algoritmo de control de flujo y congestión?
 - ¿Funciona para el caso de estudio 1 y 2 por igual? ¿Por qué?
+-->
+
+En esta parte explicaremos y observaremos mediante gráficos los datos obtenidos de nuestra simulación con el protocolo `UMBRAL && ESPERA`. Conservando los casos de estudios 1 y 2 anteriores, para poder comparar los distintos resultados usando nuestro protocolo en los distintos casos de estudio.
+
+Para crear las gráficas de todo el informe que representen los diferentes resultados, usamos Python.
+
+Como hicimos en la introducción, empecemos analizando las capacidades de los buffers para poder observar la pérdida de paquetes, lo cuál es el objetivo.
+A continuación les mostramos las gráficas de los dos casos de estudio en donde podemos ver el funcionamiento de nuestro protocolo.
+
+![Ocupación de buffers parte 2 - caso 1](/GRAFICAS/buffers-parte2-caso1.png){width=auto height=500} ![Ocupación de buffers parte 2 - caso 2](/GRAFICAS/buffers-parte2-caso2.png){width=auto height=500}
+
+Comportamiento de los distintos componentes:
+
+- **Tx -> (NodeTx)**: Podemos observar que en el buffer interno de **Tx**, a diferencia de no tener el protocolo (parte 1), como éste se irá llenando aproximadamente lineal a partir de cierto tiempo (más adelante lo analizamos), y podemos ver que el crecimiento no cesará, pero el buffer tiene suficiente tamaño para almacenar todos los paquetes que no son enviados, por lo cual no se descartarán paquetes.
+  Notemos que el comportamiento del `NodeTx` es similar en ambos casos de estudio.
+- **Nx -> (queue0)**: En esta parte podemos ver una diferencia entre los distintos casos. A primera vista podemos observar que en el **caso 1**, el almacenamiento del buffer se mantiene constante en `1`, representando que el buffer a medida que van llegando los paquetes los envía inmediatamente, logrando así un buen comportamiento de nuestro protocolo.
+  Por otra parte, en el **caso 2** podemos ver como el almacenamiento aumenta linealmente hasta alcanzar la cota en un determinado tiempo. Al llegar a la cota, nuestro protocolo se encargaría de avisar al emisor que deje de enviar paquetes, para evitar la saturación del mismo. De esta forma vemos como se desatura (en relación a la cota), porque nuestro protocolo avisará al emisor que reanude la transmisión, y siguiendo este proceso iterativamente a lo largo de toda la simulación vemos como se estabiliza el almacenamiento del buffer cercano a la cota, produciendo así un efecto serrucho como se ve en la gráfica. Consiguiendo que en ninguno de los dos casos perdamos paquetes.
+- **Rx -> (NodeRx)**: En el buffer interno de **Rx** podemos ver nuevamente entre ambas gráficas que difieren según el caso. Notar algo particular en relación al comportamiento del buffer **Nx -> (queue0)**, éste en el **caso 1** se comporta similarmente (casi igual) al Rx del **caso 2**. Análogamente el **Rx** del **caso 1** se comporta similarmente al **Nx** del **caso 2**. Es decir, en otras palabras se comportan "igual" pero intercambiados.  
+  El por qué pasa esto es debido a las distintas tasas de transferencia en los casos de estudio. Veamos en profundidad:
+  - El cuello de botella en el **caso 1** se encuentra en el enlace interno del nodo **Rx**, por ello este buffer interno será el primero en llegar a la cota.
+  - El cuello de botella en el **caso 2** se encuentra en el enlace desde **Nx -> queue0** hacia el nodo **Rx -> (NodeRx)**, de esta forma el buffer **queue0** llegará primero a la cota.
+
+<!--
+FIXME: Contar que estas graficas muestra el comportamiento muy claro del protocolo
+-->
+
+<!--
+FIXME: Contar que el punto de creciemto de Tx es justo cuando se satura algún buffer en ambos casos.
+-->
+
+<!--
+FIXME: Gráficas pendientes por explicar:
+  - Paquetes descartados.
+  - Deley.
+  - Carga ofrecida vs carga util.
 -->
 
 ---
