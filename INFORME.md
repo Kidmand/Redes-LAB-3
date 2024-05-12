@@ -10,7 +10,7 @@ Para ello diseñamos un protocolo de control de flujo y congestión inspirándon
 Obtenemos conclusiones mediante gráficos y el modelo de red en base a los datos obtenidos de la simulación.
 
 ---
-
+ 
 ## Introducción:
 
 <!--
@@ -287,10 +287,13 @@ Comportamiento de los distintos componentes:
   - El cuello de botella en el **caso 1** se encuentra en el enlace interno del nodo **Rx**, por ello este buffer interno será el primero en llegar a la cota.
   - El cuello de botella en el **caso 2** se encuentra en el enlace desde **Nx -> queue0** hacia el nodo **Rx -> (NodeRx)**, de esta forma el buffer **queue0** llegará primero a la cota.
 
-<!--
+Cabe destacar que si observamos muy detenidamente los gráficos, en resumidas cuenta, estos explican detalladamente el comportamiento de nuestro protocolo. Es decir, que las distintas partes de los gŕafico están diciendo algo muy importante sobre cómo es que funciona el protocolo. Por ejemplo como mencionamos antes, la parte del gráfico del nodo **Nx** del segundo caso de estudio después de un determinado tiempo se establece la cota del buffer **Nx** en un almacenamiento de aproximadamente 160 paquetes y luego se mantiene el almacenamiento en un rango de **`150--170`** paquetes durante toda la simulación restante. Esto sucede debido a que nuestro protocolo cada vez que el buffer supera su cota establecida lo detecta y le dice al emisor que pare, una vez que el buffer deja de superar su cota, el emisor comieza nuevamente a retransmitir.
+
+Otro punto importante a mecionar es la parte del gráfico del nodo **Tx caso 1** que a partir de los **`25seg`** el crecimiento del almacenamiento del buffer es lineal. Entonces observando detenidamente el gráfico de **Nx caso 1** vemos que justamente el almacenamiento del buffer se estabiliza justo a los **`25seg`**, este comportamiento no es casualidad, ya que se produce cuando el buffer supera su cota establecida que para el **caso 1** la cota del buffer es de **`100`** paquetes, por lo cual una vez que se supere la cota, el nodo **Tx** dejará de enviar paquetes hacia el nodo **Nx** almacenando dichos paquetes en su buffer interno, que es justamente esto lo que podemos ver en las gŕaficas. El crecimiento del almacenamiento del buffer es lineal a partir de la primera saturación **(se pasa de la cota establecida)** del buffer. 
+
+   <!--
 FIXME: Contar que estas graficas muestra el comportamiento muy claro del protocolo
 -->
-
 <!--
 FIXME: Contar que el punto de creciemto de Tx es justo cuando se satura algún buffer en ambos casos.
 -->
