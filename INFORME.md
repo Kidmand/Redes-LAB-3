@@ -1,11 +1,15 @@
 # Análisis de flujo y congestion en redes utilizando simulación discreta y un protocolo.
 
+---
+
 ## Resumen:
 
 En este trabajo se analiza el tráfico de red bajo tasas de datos acotadas y tamaño de buffers limitados.
 Con el fin de diseñar y proponer soluciones de control de congestión y flujo sobre modelos de red, utilizando simulación discreta con la herramienta Omnet++, bajo el lenguaje c++.
 Para ello diseñamos un protocolo de control de flujo y congestión inspirándonos en la sencillez para mantener la eficiencia de la red y la complejidad algorítmica.
 Obtenemos conclusiones mediante gráficos y el modelo de red en base a los datos obtenidos de la simulación.
+
+---
 
 ## Introducción:
 
@@ -23,7 +27,7 @@ Las redes están formadas por distintos tipos de nodos que:
 - Retransmiten/procesan paquetes.
 - Consumen paquetes (sumidero).
 
-![Red Básica](/IMGs/red-basica.png)
+![Red Básica](/IMGs/red-basica.png){width=250 height=auto}
 
 El principal objetivo de una red es transmitir paquetes de un punto a otro. Pero al analizar distintos casos de estudio, podemos darnos cuenta de un problema, se pierden paquetes y nunca llegan a destino.
 
@@ -79,13 +83,11 @@ Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abs
 
 Luego tenemos los siguientes enlaces que conectan los nodos en la red:
 
-![Red parte 1](/IMGs/red-parte1.png)
+![Red parte 1](/IMGs/red-parte1.png){width=250 height=auto}
 
 Pero internamente **NodeTx** y **NodeRx** tienen los siguientes enlaces:
 
-![NodeTx parte 1](/IMGs/NodeTx-parte1.png)
-
-![NodeRx parte 1](/IMGs/NodeRx-parte1.png)
+![NodeTx parte 1](/IMGs/NodeTx-parte1.png){width=auto height=250} ![NodeRx parte 1](/IMGs/NodeRx-parte1.png){width=auto height=250}
 Los casos de estudio son:
 
 - **Caso 1**:
@@ -103,7 +105,7 @@ Ejecutamos la simulación durante `200s` para cada caso y obtuvimos las siguient
 
 En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
-![Ocupación de buffers parte 1 - caso 1](/GRAFICAS/buffers-parte1-caso1.png)
+![Ocupación de buffers parte 1 - caso 1](/GRAFICAS/buffers-parte1-caso1.png){width=auto height=500}
 
 Analizando, podemos notar tres cosas:
 
@@ -113,7 +115,7 @@ Analizando, podemos notar tres cosas:
 
 Veamos ahora cuando y donde se descartan paquetes:
 
-![Paquetes descartados parte 1 - caso 1](/GRAFICAS/pkt-descartados-parte1-caso1.png)
+![Paquetes descartados parte 1 - caso 1](/GRAFICAS/pkt-descartados-parte1-caso1.png){width=auto height=320}
 
 En la gráfica podemos ver claramente como la única parte donde se descartan paquetes es en el buffer de **NodeRx.queue**. Esto se debe justamente al **cuello de botella** que mencionamos anteriormente. Notar que el tiempo en el que se descartan paquetes es a partir de los `40s` aproximadamente y coincide con el momento en el que el buffer de **NodeRx** empieza a mantenerse constante en `200` paquetes.
 
@@ -121,7 +123,7 @@ En la gráfica podemos ver claramente como la única parte donde se descartan pa
 
 En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
-![Ocupación de buffers parte 1 - caso 2](/GRAFICAS/buffers-parte1-caso2.png)
+![Ocupación de buffers parte 1 - caso 2](/GRAFICAS/buffers-parte1-caso2.png){width=auto height=500}
 
 Analizando, podemos compáralo con el caso anterior y notar que:
 
@@ -131,7 +133,7 @@ Analizando, podemos compáralo con el caso anterior y notar que:
 
 Veamos ahora cuando y donde se descartan paquetes:
 
-![Paquetes descartados parte 1 - caso 2](/GRAFICAS/pkt-descartados-parte1-caso2.png)
+![Paquetes descartados parte 1 - caso 2](/GRAFICAS/pkt-descartados-parte1-caso2.png){width=auto height=320}
 
 Claramente se ve como la única queue que descarta paquetes es la de **NodeNx** debido a lo mencionado anteriormente. Notar que ocurre lo mismo que en el caso anterior, a partir de los `40s` aproximadamente.
 
@@ -162,6 +164,8 @@ El control de flujo y el control de congestión son dos conceptos fundamentales 
 
 En resumen, mientras que el control de flujo se centra en la relación entre el emisor y el receptor para evitar que el receptor se sobrecargue, el control de congestión se centra en la gestión del tráfico de datos en toda la red para evitar la saturación de los recursos de la red.
 
+---
+
 ## Métodos:
 
 <!--
@@ -173,17 +177,19 @@ Una sección que describir nuestra propuesta de solución:
 
 A continuación presentamos algunas modificación que se hicieron en la red:
 
-![Red parte 2](/IMGs/red-parte2.png)
+![Red parte 2](/IMGs/red-parte2.png){width=auto height=auto}
 
 Notar que ahora tenemos dos **queue** intermedios, pero uno es unicamente para manejar paquetes de control, que serán enviados por el protocolo que diseñamos.
 
 Por otra parte también se modificaron los enlaces internos de **NodeTx** y **NodeRx**:
 
 El funcionamiento de **traTx** es similar que al de la **queue** nada mas que ahora no solo envía paquetes a **queue0** sino que también puede recibir paquetes de **queue1** y procesarlos.
-![NodeTx parte 2](/IMGs/NodeTx-parte2.png)
+![NodeTx parte 2](/IMGs/NodeTx-parte2.png){width=auto height=250}
 
 El funcionamiento de **traRx** es similar que al de la **queue** nada mas que ahora no solo recibe paquetes de **queue0** sino que también puede enviar paquetes a **queue1** de control.
-![NodeRx parte 2](/IMGs/NodeRx-parte2.png)
+![NodeRx parte 2](/IMGs/NodeRx-parte2.png){width=auto height=250}
+
+### Protocolo diseñado: **UMBRAL && ESPERA**
 
 Nuestro protocolo recibe como nombre **UMBRAL && ESPERA** ya que usamos cotas en los buffers para evitar la pérdida de paquetes y creamos un tipo de paquetes para el control encargado de avisar al emisor que deje de enviar paquetes.
 
@@ -202,7 +208,7 @@ Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos
 
 Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el comportamiento adicional de **NodeRx**. Este se encarga de avisar por la ruta **NodeRx.queue ---> queue1 ---> NodeTx.queue** el estado actual de los buffers en la red. Para ello enviamos mensajes/paquetes de control sucesivamente informado con un booleano si algún buffer supera alguna cota. Consiguiendo de esta manera que el NodeTx siempre sepa el estado de la red para controla la transmisión de paquetes, evitando la saturación de los buffers en la red.
 
-## Caso 1: Que se sature el buffer queue0.
+#### Caso 1: Que se sature el buffer queue0.
 
 - Supongamos ahora que la tasa de transferencia de **queue0** ----> **NodeTx.traRx** es menor que la tasa de transferencia **NodeTx.traTx** ----> **queue0** que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenándose continuadamente.
 - Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente.
@@ -214,7 +220,7 @@ Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el c
 - Cuando los buffers dejen de superar la cota establecida, el último buffer que dejó de superar la cota, enviará un paquete hacia **NodeTx** indicando que reanude la retransmisión.
 - Para el caso 1, el buffer **queue0** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
-## Caso 2: Que se sature el buffer de NodeRx.traRx.
+#### Caso 2: Que se sature el buffer de NodeRx.traRx.
 
 - Supongamos ahora que la congestión se produce en el buffer interno de **NodeRx** es decir en **NodeRx.traRx**, en este caso se produce un cuello de botella con lo cual los paquete que van llegando al buffer interno de **NodeRx** irán almacenándose continuadamente.
 - Al igual que en el caso 1, si continuamos enviado paquetes, el buffer interno se irá llenando gradualmente.
@@ -227,23 +233,23 @@ Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el c
 Entonces en resumidas cuentas, nuestro protocolo detecta cuando los buffers superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes con lo cual los paquetes del emisor irán almacenándose en su buffer interno, cuando se detecte que todos los buffers ya no superan las cotas, entonces se envía nuevamente un paquete al emisor avisándole que puede restablecer el envió de los paquetes y así sucesivamente.
 Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulación, nuestro protocolo se establecerá en un valor fijo de paquete que se envía y paquetes almacenados en los buffers como pueden ver en las imágenes siguientes:
 
-![Ocupación de buffers parte 2 - caso 1](/GRAFICAS/buffers-parte2-caso1.png)
+![Ocupación de buffers parte 2 - caso 1](/GRAFICAS/buffers-parte2-caso1.png){width=auto height=500} ![Ocupación de buffers parte 2 - caso 2](/GRAFICAS/buffers-parte2-caso2.png){width=auto height=500}
 
-![Ocupación de buffers parte 2 - caso 2](/GRAFICAS/buffers-parte2-caso2.png)
-
-## Como llegamos a las ideas para la implementación de nuestro protocolo.
+### Como llegamos a las ideas para la implementación de nuestro protocolo.
 
 - En principio nos dimos cuenta que una manera de evitar la saturación de los buffers era justamente usar cotas que restringieran de alguna manera este problema.
 - Una vez que establecimos cotas como principio constructor para nuestro algoritmo, lo siguiente fue pensar en relacionar los nodos del network para mantener información sobre los estados de los buffers y cómo poder controlar este problema.
 - En base a estudiar los problemas mencionados anteriormente y el análisis de lo que teníamos en mente, llegamos a la idea de implementar mensajes de `ESPERA` al emisor para evitar seguir congestionando la red.
 
-## Hipótesis de por qué creemos que va a funcionar.
+### Hipótesis de por qué creemos que va a funcionar.
 
 - Tenemos cotas en lo buffers para evitar la saturación de los mismos.
 - Cuando detectamos que algunos de los buffers supera su cota establecida, enviamos un mensaje/paquete al emisor para que detenga la transmisión.
 - Una vez que los buffers dejan de superar su cota establecida, se envía un mensaje/paquete al emisor para que se reanude la transmisión de los paquetes.
 
 Todo esto evitaría que se pierdan paquetes por saturación de buffers
+
+---
 
 ## Resultados:
 
@@ -264,6 +270,8 @@ El enunciado dice que hay que contestar las siguientes preguntas de la PARTE TAR
 - ¿Cómo cree que se comporta su algoritmo de control de flujo y congestión?
 - ¿Funciona para el caso de estudio 1 y 2 por igual? ¿Por qué?
 -->
+
+---
 
 ## Discusiones:
 
@@ -292,6 +300,8 @@ En esta situación tenemos que el buffer de queue0 se va a llenar enseguida supo
 
 De esta forma introducimos una posible mejora al protocolo, además de garantizar que nunca se superen las cotas. Revisar también que en la red nunca haya más paquetes que los que pueden entrar en un buffer (ignorando el nodeTX). Esto se podría llevar a cabo con mensaje de control que informe al siguiente nodo cuántos paquetes se tienen actualmente en la cola, luego cuando se recibe esa información, sumarla a los paquetes que se tienen en ese nodo, y si la suma da mayor a la capacidad del buffer avisar que no se envíen mas paquetes.
 
+---
+
 ## Referencias:
 
 <!--
@@ -303,6 +313,8 @@ Si agregamos imágenes de Tanembaun para explicar algo de flujo y congestion, ta
 
 - Andrew S. Tanenbaum, David J. Wetherall, Redes de Computadoras (5ta edición 2011), Pearson.
 - Omnet++ Simulation Manual, (OMNeT++ version 6.0.3, 2020).
+
+---
 
 ## Anexo: Inteligencia Artificial
 
@@ -320,3 +332,5 @@ Para este tipo de consultas utilizamos principalmente **Chat Gpt 3.5**, consider
 ### Complemento en la escritura de código
 
 Para esto tenemos **Github Copilot**, nos ayuda a completar código que es repetitivo o sencillo, no dejamos que nos complete todo porque siempre sale mal y terminamos borrando lo que nos sugiere. Pero para cosas como completar un `for` o un `if` nos ayuda mucho. Notamos un incremento en nuestra velocidad de escritura de código y consideramos que esto es muy bueno, por eso la seguimos utilizando. Por otra parte nos planteamos si esto nos perjudica en algo y encontramos una gran desventaja de usarlo, "nos acostumbramos", esto puede ser malo si de un dia para el otro no lo tenemos más, quizá nos cueste más escribir código. Por ello cada tanto la desactivamos y escribimos código a mano para no perder la costumbre.
+
+---
