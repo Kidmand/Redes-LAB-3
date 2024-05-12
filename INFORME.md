@@ -45,9 +45,9 @@ Algunos intentan solucionar este problema evitando que se pierdan de ninguna for
 Otros implementan una mezcla de ambos, para garantizar la entrega de paquetes y evitar la saturación de buffers.
 
 <!--
-- Metodologia de trabajo.
-    + Ej: "Nosotros vamos a trabajar con simulacion discreta, que es ...
-           y emplearems un protocolo que vamos a proponer, para analizar el flujo y congestion en redes ..."
+- Metodología de trabajo.
+    + Ej: "Nosotros vamos a trabajar con simulación discreta, que es ...
+           y emplearemos un protocolo que vamos a proponer, para analizar el flujo y congestion en redes ..."
 -->
 
 Para trabajar sobre redes utilizamos el simulador de eventos discretos **(Omnet++)**. Elegimos esta herramienta ya que nos permite previsualizar la red y el efecto del diseño de nuestros protocolos en ella, cosa que no se podría ver con la misma facilidad en la vida real sobre una red física existente. Por ejemplo, nos permite controlar los tiempos y demás variables de la red.
@@ -56,7 +56,7 @@ Para trabajar sobre redes utilizamos el simulador de eventos discretos **(Omnet+
 - Presentación de nuestros casos de estudio.
    + Explicar caso 1: su ventaja, problemas, etc.
    + Explicar caso 2: su ventaja, problemas, etc.
-   + Obs: Incluir las primeras graficas de la parte 1, con las conculciones y problemas que encontramos osea interpretarlas (ej, aca podemos ver que los paquetes, buffers, paquetes enviado, tal y tal cosa ...)
+   + Obs: Incluir las primeras gráficas de la parte 1, con las conclusiones y problemas que encontramos osea interpretarlas (ej, aca podemos ver que los paquetes, buffers, paquetes enviado, tal y tal cosa ...)
 -->
 
 Para empezar a ver los problemas de congestión y el control de flujo así como también ver la manera en la que nuestro protocolo funciona, tenemos dos casos de estudios para poder analizar más en detalle las cosas explicadas anteriormente.
@@ -164,6 +164,13 @@ En resumen, mientras que el control de flujo se centra en la relación entre el 
 
 ## Métodos:
 
+<!--
+Una sección que describir nuestra propuesta de solución:
+- Describimos el algoritmo.
+- Como llegamos a esa idea.
+- Una pequeña hipótesis de porque creemos que va a funcionar.
+-->
+
 A continuación presentamos algunas modificación que se hicieron en la red:
 
 ![Red parte 2](/IMGs/red-parte2.png)
@@ -238,13 +245,6 @@ Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulaci�
 
 Todo esto evitaría que se pierdan paquetes por saturación de buffers
 
-<!--
-Una sección que describir nuestra propuesta de solución:
-- Describimos el algoritmo.
-- Como llegamos a esa idea.
-- Una pequeña hipótesis de porque creemos que va a funcionar.
--->
-
 ## Resultados:
 
 <!--
@@ -296,7 +296,7 @@ De esta forma introducimos una posible mejora al protocolo, además de garantiza
 
 <!--
 - Todas las referencias que usamos en el trabajo. LIBROS, PAPERS, WEB, ETC.
-(Nosotros usamos el manual de omnet++ y  quizás algo más ...).
+(Nosotros usamos el manual de Omnet++ y quizás algo más ...).
 
 Si agregamos imágenes de Tanembaun para explicar algo de flujo y congestion, también se debe referenciar.
 -->
