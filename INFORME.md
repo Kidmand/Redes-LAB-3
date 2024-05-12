@@ -210,9 +210,7 @@ Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos
 - Para el caso 1, el buffer **queue0** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
 
-## Caso 2: Que se sature el buffer de 
-
-NodeRx.traRx.
+## Caso 2: Que se sature el buffer de NodeRx.traRx.
 - Supongamos ahora que la congestón se produce en el buffer interno de **NodeRx** es decir en **NodeTx.traTx**, en este caso se produce un cuello de botella con lo cual los paquete que van llegando al buffer interno de **NodeRx** irán almacenandose continuadamente.
 - Al igual que en el caso 1, si continuamos enviado paquetes, el buffer interno se irá llenando gradualmente.
 - Cuando se supere la cota del buffer interno, nuestro protocolo detectará esto, por lo cual se enviará un paquete desde **NodeRx** hacia **queue1** para que este lo envia a **NodeTx** indicando que se pare la transmisión.
