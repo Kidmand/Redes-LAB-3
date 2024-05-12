@@ -269,6 +269,27 @@ El enunciado dice que hay que contestar las siguientes preguntas de la PARTE TAR
 Una sección con los logros, limitaciones y posibles mejoras de nuestro algoritmo propuesto.
 -->
 
+Como logro en nuestro protocolo de control de flujo y congestion tenemos que para redes con tamaños de buffers suficiente mente grandes y tasas de transferencias no tan alejadas, resuelve por completo la perdida de paquetes, ademas al trabajar con colas en buffers incuso llegan en orden.
+Por otra parte es interesante notar que al ejecutar el protocolo al principio no conoce mucho las red, pero a medida que pasa el tiempo consigue enviar la mayor tasa de transferencia posible sin perdida de paquetes y mantenerse en un rango aceptable en el tiempo de envió de paquetes.
+Incluso los paquetes de control que viajan por el camino de datos, al ser tan pequeños (1Byte) y enviados la menor cantidad de veces posible no influye casi nada en la carga util <!-- FIXME: o ofrecida ? -->. Conseguimos un algoritmo que resuelve tanto el problema de control de flujo y congestion de forma efectiva si se dan las condiciones.
+
+Veamos las limitaciones, notar que al trabajar con cotas en porcentajes si los tamaños de los buffers disminuyen, puede haber perdida de paquetes. Nuestro protocolo aprovecha ese porcentaje restante de paquetes que saturan los buffers utilizando ese tiempo para controlar la red y dejar de enviar paquetes, si estos son muy pocos no se va enterar el nodoTx a tiempo y se van a perder paquetes que luego no retransmitimos en nuestro protocolo.
+
+Por otra parte tenemos inconvenientes si las tasas de transferencia difieren mucho entre si, imaginemos un caso en particular para visualizar la problemática, especifiquemos tasas de transferencia:
+
+- NodeTx.queue ----- (100Mbps) ----> queue0
+- queue0 ----- (1Mbps) ----> NodeRx.queue
+- NodeRx.queue ----- (0.1Mbps) ----> Sink
+
+Ahora especifiquemos los tamaños de buffers y sus cotas:
+
+- queue0: 200pkt, cota=%80 => 160pkt.
+- NodeRx.queue: 200pkt, cota=%50 => 100pkt.
+
+En esta situación tenemos que el buffer de queue0 se va a llenar enseguida supongamos 199pkt y va a avisar que no se envíen paquetes por lo tanto va a empezar a enviar todos su paquetes a NodeRx.queue, pero este algún paquete tenia en su buffer, pr lo tanto como envía tan lento le pueden llegar todos los de queue0 y en ese punto NodeRx.queue va a descartar paquetes. Esto sucede porque en la red hay mas paquetes que los que pueden entrar en un solo buffer.
+
+De esta forma introducimos una posible mejora al protocolo, ademas de garantizar que nunca se superen las cotas, revisar también que en la red nunca haya mas paquetes que los que pueden entrar en un buffer (ignorando el nodeTX). Esto se podría llevar a cabo con mensaje de control que informe al siguiente nodo cuantos paquetes se tienen actualmente en la cola, luego cuando se recibe esa información, sumarla a los paquetes que se tienen en ese nodo y si la suma da mayor a la capacidad del buffer avisar que no se envíen mas paquetes.
+
 ## Referencias:
 
 <!--
