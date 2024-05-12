@@ -197,9 +197,11 @@ Notar que en nuestra red podemos tener dos situaciones de cuello de botella:
 
 Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos (o ambos), esto lo logramos revisando que no se supere la cota.
 
+Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el comportamiento adicional de **NodeRx**. Este se encarga de avisar por la ruta **NodeRx.queue ---> queue1 ---> NodeTx.queue** el estado actual de los buffers en la red. Para ello enviamos mensajes/paquetes de control sucesivamente informado con un booleano si algún buffer supera alguna cota. Consiguiendo de esta manera que el NodeTx siempre sepa el estado de la red para controla la transmisión de paquetes, evitando la saturación de los buffers en la red.
+
 ## Caso 1: Que se sature el buffer queue0.
 
-- Supongamos ahora que la tasa de transferencia de **queue0** ----> **ModeTx.traRx** es menor que la tasa de transferencia **NodeTx.traTx** ----> **queue0** que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenándose continuadamente.
+- Supongamos ahora que la tasa de transferencia de **queue0** ----> **NodeTx.traRx** es menor que la tasa de transferencia **NodeTx.traTx** ----> **queue0** que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenándose continuadamente.
 - Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente.
 - Cuando se supere la cota, nuestro protocolo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola del **queue0**, que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
 - Cuando lo detecta enviamos un paquete (indicando que se debe parar la transmisión) hacia el buffer **queue1** que éste a su vez envía el paquete a **NodeTx** indicando que se dejen de enviar paquetes para evitar la saturación de los buffers.
