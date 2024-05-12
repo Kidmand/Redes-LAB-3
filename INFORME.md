@@ -195,46 +195,50 @@ Notar que en nuestra red podemos tener dos situaciones de cuello de botella:
 - Que se sature el buffer **queue0**.
 - Que se sature el buffer de **NodeRx.traRx**.
 
-Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos, esto lo logramos revisando que no se supere la cota.
+Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos (o ambos), esto lo logramos revisando que no se supere la cota.
 
 ## Caso 1: Que se sature el buffer queue0.
-- Supongamos ahora que la taza de transferencia de **queue0** ----> **ModeTx.traRx** es menor que la taza de transferencia **NodeTx.traTx** ----> **queue0** que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente.
+
+- Supongamos ahora que la tasa de transferencia de **queue0** ----> **ModeTx.traRx** es menor que la tasa de transferencia **NodeTx.traTx** ----> **queue0** que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenándose continuadamente.
 - Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente.
-- Cuando se supere la cota, nuestro protocolo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola del **queue0**,
-  que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
-- Cuando lo detecta enviamos un paquete (indicando que se debe parar la trasnmisión) hacia el buffer **queue1** que éste a su vez envia el paquete a **NodeTx** imdicando que se dejen de enviar paquetes para evitar la saturación de los buffers.
-- En nuestro algoritmo, **NodeRx** envia constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
+- Cuando se supere la cota, nuestro protocolo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola del **queue0**, que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
+- Cuando lo detecta enviamos un paquete (indicando que se debe parar la transmisión) hacia el buffer **queue1** que éste a su vez envía el paquete a **NodeTx** indicando que se dejen de enviar paquetes para evitar la saturación de los buffers.
+- En nuestro algoritmo, **NodeRx** envía constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
 - Mientras **NodeTx** no reciba un paquete que indique que deba parar la transmisión, éste seguirá retransmitiendo.
-- Una vez que **NodeTx** paró de transmitir porque recibió un paquete indicando que debía para, este seguirá sin retransmitir hasta que le indiquen lo contrario.   
-- Cuando los buffers dejen de superar la cota establecida, el último buffer que dejó de superar la cota, enviará un paqute hacia **NodeTx** indicando que reanude la retransmisión.
+- Una vez que **NodeTx** paró de transmitir porque recibió un paquete indicando que debía para, este seguirá sin retransmitir hasta que le indiquen lo contrario.
+- Cuando los buffers dejen de superar la cota establecida, el último buffer que dejó de superar la cota, enviará un paquete hacia **NodeTx** indicando que reanude la retransmisión.
 - Para el caso 1, el buffer **queue0** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
-
 ## Caso 2: Que se sature el buffer de NodeRx.traRx.
-- Supongamos ahora que la congestón se produce en el buffer interno de **NodeRx** es decir en **NodeTx.traTx**, en este caso se produce un cuello de botella con lo cual los paquete que van llegando al buffer interno de **NodeRx** irán almacenandose continuadamente.
+
+- Supongamos ahora que la congestión se produce en el buffer interno de **NodeRx** es decir en **NodeRx.traRx**, en este caso se produce un cuello de botella con lo cual los paquete que van llegando al buffer interno de **NodeRx** irán almacenándose continuadamente.
 - Al igual que en el caso 1, si continuamos enviado paquetes, el buffer interno se irá llenando gradualmente.
-- Cuando se supere la cota del buffer interno, nuestro protocolo detectará esto, por lo cual se enviará un paquete desde **NodeRx** hacia **queue1** para que este lo envia a **NodeTx** indicando que se pare la transmisión.
-- Análogamente a lo anterior **NodeRx** envia constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
+- Cuando se supere la cota del buffer interno, nuestro protocolo detectará esto, por lo cual se enviará un paquete desde **NodeRx** hacia **queue1** para que este lo envía a **NodeTx** indicando que se pare la transmisión.
+- Análogamente a lo anterior **NodeRx** envía constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
 - Mientras no se supere la cota del buffer interno de **NodeRx**, éste seguirá enviando mensajes a **queue1** para que siga la transmisión de paquetes.
-- Una vez que el buffer interno deje de superar la cota, se enviará un paquete a **queue1** hacia **NodeTx** indicando la reanudación de la trasnmisión. 
+- Una vez que el buffer interno deje de superar la cota, se enviará un paquete a **queue1** hacia **NodeTx** indicando la reanudación de la transmisión.
 - Para el caso 2, el buffer interno de **NodeRx** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
+Entonces en resumidas cuentas, nuestro protocolo detecta cuando los buffers superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes con lo cual los paquetes del emisor irán almacenándose en su buffer interno, cuando se detecte que todos los buffers ya no superan las cotas, entonces se envía nuevamente un paquete al emisor avisándole que puede restablecer el envió de los paquetes y así sucesivamente.
+Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulación, nuestro protocolo se establecerá en un valor fijo de paquete que se envía y paquetes almacenados en los buffers como pueden ver en las imágenes siguientes:
 
-Entonces en resumidas cuentas, nuestro protoclo detecta cuando los bufferes superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes
-con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detecteten que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así sucesivamente.
-Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulacón, nuestro protocolo se establecerá en un valor fijo de paquete que se envia y paquetes almacenados en los bufferes como pueden ver en las imagenes siguientes.
+![Ocupación de buffers parte 2 - caso 1](/GRAFICAS/buffers-parte2-caso1.png)
 
+![Ocupación de buffers parte 2 - caso 2](/GRAFICAS/buffers-parte2-caso2.png)
 
-## Como llegamos a las ideas para la implementación de nuestro protocolo. 
-- En principio nos dimos cuenta que una manera de evitar la saturación de los buffers era justamente usar cotas que restringuieran de alguna manera este problema.
-- Una vez que establecimos cotas como principio constructor para nuestro algoritmo, lo siguiente fue pensar en relacionar los nodos del network para mantener información
-sobre los estados de los buffers y cómo poder controlar este problema. 
-- En base a estudiar los problemas mencionados anterioremente y el análisis de lo que teníamos en mente, llegamos a la idea de implementar mensajes de `ESPERA` al emisor para evitar seguir congestionando la red.
+## Como llegamos a las ideas para la implementación de nuestro protocolo.
 
-## Hipótesis de por qué creemos que va a funcionar. 
-- Tenemos cotas en lo buffers para evitar la saturación de los mismos. 
-- Cuando detectamos que algunos de los buffers supera su cota establecida, enviamos un mensaje/paquete al emisor para que detenga la trasnmisión. 
-- Una vez que los buffers dejan de superar su cota establecida, se envia un mensaje/paquete al emisor para que se reanude la transmisión de los paquetes.  
+- En principio nos dimos cuenta que una manera de evitar la saturación de los buffers era justamente usar cotas que restringieran de alguna manera este problema.
+- Una vez que establecimos cotas como principio constructor para nuestro algoritmo, lo siguiente fue pensar en relacionar los nodos del network para mantener información sobre los estados de los buffers y cómo poder controlar este problema.
+- En base a estudiar los problemas mencionados anteriormente y el análisis de lo que teníamos en mente, llegamos a la idea de implementar mensajes de `ESPERA` al emisor para evitar seguir congestionando la red.
+
+## Hipótesis de por qué creemos que va a funcionar.
+
+- Tenemos cotas en lo buffers para evitar la saturación de los mismos.
+- Cuando detectamos que algunos de los buffers supera su cota establecida, enviamos un mensaje/paquete al emisor para que detenga la transmisión.
+- Una vez que los buffers dejan de superar su cota establecida, se envía un mensaje/paquete al emisor para que se reanude la transmisión de los paquetes.
+
+Todo esto evitaría que se pierdan paquetes por saturación de buffers
 
 <!--
 Una sección que describir nuestra propuesta de solución:
@@ -269,13 +273,13 @@ El enunciado dice que hay que contestar las siguientes preguntas de la PARTE TAR
 Una sección con los logros, limitaciones y posibles mejoras de nuestro algoritmo propuesto.
 -->
 
-Como logro en nuestro protocolo de control de flujo y congestion tenemos que para redes con tamaños de buffers suficiente mente grandes y tasas de transferencias no tan alejadas, resuelve por completo la perdida de paquetes, ademas al trabajar con colas en buffers incuso llegan en orden.
-Por otra parte es interesante notar que al ejecutar el protocolo al principio no conoce mucho las red, pero a medida que pasa el tiempo consigue enviar la mayor tasa de transferencia posible sin perdida de paquetes y mantenerse en un rango aceptable en el tiempo de envió de paquetes.
-Incluso los paquetes de control que viajan por el camino de datos, al ser tan pequeños (1Byte) y enviados la menor cantidad de veces posible no influye casi nada en la carga util <!-- FIXME: o ofrecida ? -->. Conseguimos un algoritmo que resuelve tanto el problema de control de flujo y congestion de forma efectiva si se dan las condiciones.
+Como logro en nuestro protocolo de control de flujo y congestion tenemos que para redes con tamaños de buffers suficientemente grandes y tasas de transferencias no tan alejadas, resuelve por completo la perdida de paquetes, además al trabajar con colas en buffers incluso llegan en orden.
+Por otra parte es interesante notar que al ejecutar el protocolo al principio no conoce mucho las red, pero a medida que pasa el tiempo consigue enviar la mayor tasa de transferencia posible sin perdida de paquetes y mantenerse en un rango aceptable en la transmisión de paquetes.
+Incluso los paquetes de control que viajan por la ruta de datos, al ser tan pequeños (1Byte) y enviados la menor cantidad de veces posible no influye casi nada en la carga útil<!-- FIXME: o ofrecida ? -->. Conseguimos un algoritmo que resuelve tanto el problema de control de flujo y congestión de forma efectiva si se dan las condiciones.
 
-Veamos las limitaciones, notar que al trabajar con cotas en porcentajes si los tamaños de los buffers disminuyen, puede haber perdida de paquetes. Nuestro protocolo aprovecha ese porcentaje restante de paquetes que saturan los buffers utilizando ese tiempo para controlar la red y dejar de enviar paquetes, si estos son muy pocos no se va enterar el nodoTx a tiempo y se van a perder paquetes que luego no retransmitimos en nuestro protocolo.
+Veamos las limitaciones, notar que al trabajar con cotas en porcentajes, si los tamaños de los buffers disminuyen, puede haber perdida de paquetes. Nuestro protocolo aprovecha ese porcentaje restante de paquetes que saturan los buffers utilizando ese tiempo para controlar la red y dejar de enviar paquetes, si estos son muy pocos no se va enterar el nodoTx a tiempo y se van a perder paquetes que luego no retransmitimos en nuestro protocolo.
 
-Por otra parte tenemos inconvenientes si las tasas de transferencia difieren mucho entre si, imaginemos un caso en particular para visualizar la problemática, especifiquemos tasas de transferencia:
+Por otra parte tenemos inconvenientes si las tasas de transferencia difieren mucho entre sí, imaginemos un caso en particular para visualizar la problemática. Especifiquemos tasas de transferencia:
 
 - NodeTx.queue ----- (100Mbps) ----> queue0
 - queue0 ----- (1Mbps) ----> NodeRx.queue
@@ -286,9 +290,9 @@ Ahora especifiquemos los tamaños de buffers y sus cotas:
 - queue0: 200pkt, cota=%80 => 160pkt.
 - NodeRx.queue: 200pkt, cota=%50 => 100pkt.
 
-En esta situación tenemos que el buffer de queue0 se va a llenar enseguida supongamos 199pkt y va a avisar que no se envíen paquetes por lo tanto va a empezar a enviar todos su paquetes a NodeRx.queue, pero este algún paquete tenia en su buffer, pr lo tanto como envía tan lento le pueden llegar todos los de queue0 y en ese punto NodeRx.queue va a descartar paquetes. Esto sucede porque en la red hay mas paquetes que los que pueden entrar en un solo buffer.
+En esta situación tenemos que el buffer de queue0 se va a llenar enseguida supongamos 199pkt y va a avisar que no se envíen paquetes, por lo tanto va a empezar a enviar todos su paquetes a NodeRx.queue, pero éste algún paquete tenia en su buffer, como envía tan lento le pueden llegar todos los de queue0 y en ese punto NodeRx.queue va a descartar paquetes. Esto sucede porque en la red hay más paquetes que los que pueden entrar en un solo buffer.
 
-De esta forma introducimos una posible mejora al protocolo, ademas de garantizar que nunca se superen las cotas, revisar también que en la red nunca haya mas paquetes que los que pueden entrar en un buffer (ignorando el nodeTX). Esto se podría llevar a cabo con mensaje de control que informe al siguiente nodo cuantos paquetes se tienen actualmente en la cola, luego cuando se recibe esa información, sumarla a los paquetes que se tienen en ese nodo y si la suma da mayor a la capacidad del buffer avisar que no se envíen mas paquetes.
+De esta forma introducimos una posible mejora al protocolo, además de garantizar que nunca se superen las cotas. Revisar también que en la red nunca haya más paquetes que los que pueden entrar en un buffer (ignorando el nodeTX). Esto se podría llevar a cabo con mensaje de control que informe al siguiente nodo cuántos paquetes se tienen actualmente en la cola, luego cuando se recibe esa información, sumarla a los paquetes que se tienen en ese nodo, y si la suma da mayor a la capacidad del buffer avisar que no se envíen mas paquetes.
 
 ## Referencias:
 
@@ -317,4 +321,4 @@ Para este tipo de consultas utilizamos principalmente **Chat Gpt 3.5**, consider
 
 ### Complemento en la escritura de código
 
-Para esto tenemos **Github Copilot**, nos ayuda a completar código que es repetitivo o sencillo, no dejamos que nos complete todo porque siempre sale mal y terminamos borrando lo que nos sugiere. Pero para cosas como completar un `for` o un `if` nos ayuda mucho. Notamos un incremento en nuestra velocidad de escritura de código y consideramos que esto es muy bueno por eso la seguimos utilizando. Por otra parte nos planteamos, si esto nos perjudica en algo y encontramos una gran desventaja de usarlo, "nos acostumbramos", esto puede ser malo si de un dia para el otro no lo tenemos mas, quizá nos cueste mas escribir código. Por ello cada tanto la desactivamos y escribimos código a mano para no perder la costumbre.
+Para esto tenemos **Github Copilot**, nos ayuda a completar código que es repetitivo o sencillo, no dejamos que nos complete todo porque siempre sale mal y terminamos borrando lo que nos sugiere. Pero para cosas como completar un `for` o un `if` nos ayuda mucho. Notamos un incremento en nuestra velocidad de escritura de código y consideramos que esto es muy bueno, por eso la seguimos utilizando. Por otra parte nos planteamos si esto nos perjudica en algo y encontramos una gran desventaja de usarlo, "nos acostumbramos", esto puede ser malo si de un dia para el otro no lo tenemos más, quizá nos cueste más escribir código. Por ello cada tanto la desactivamos y escribimos código a mano para no perder la costumbre.
