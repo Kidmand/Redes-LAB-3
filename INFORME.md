@@ -224,6 +224,18 @@ Entonces en resumidas cuentas, nuestro protoclo detecta cuando los bufferes supe
 con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detecteten que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así sucesivamente.
 Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulacón, nuestro protocolo se establecerá en un valor fijo de paquete que se envia y paquetes almacenados en los bufferes como pueden ver en las imagenes siguientes.
 
+
+## Como llegamos a las ideas para la implementación de nuestro protocolo. 
+- En principio nos dimos cuenta que una manera de evitar la saturación de los buffers era justamente usar cotas que restringuieran de alguna manera este problema.
+- Una vez que establecimos cotas como principio constructor para nuestro algoritmo, lo siguiente fue pensar en relacionar los nodos del network para mantener información
+sobre los estados de los buffers y cómo poder controlar este problema. 
+- En base a estudiar los problemas mencionados anterioremente y el análisis de lo que teníamos en mente, llegamos a la idea de implementar mensajes de `ESPERA` al emisor para evitar seguir congestionando la red.
+
+## Hipótesis de por qué creemos que va a funcionar. 
+- Tenemos cotas en lo buffers para evitar la saturación de los mismos. 
+- Cuando detectamos que algunos de los buffers supera su cota establecida, enviamos un mensaje/paquete al emisor para que detenga la trasnmisión. 
+- Una vez que los buffers dejan de superar su cota establecida, se envia un mensaje/paquete al emisor para que se reanude la transmisión de los paquetes.  
+
 <!--
 Una sección que describir nuestra propuesta de solución:
 - Describimos el algoritmo.
