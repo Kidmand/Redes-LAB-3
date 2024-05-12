@@ -188,7 +188,7 @@ El algoritmo hace lo siguiente, dependiendo los casos de estudio, tenemos cotas 
 
 El funcionamiento se da a continuación:
 
-- Se envían los paquetes normalmente hacia los nodos, en nuestro caso enviamos paquetes desde el nodo **TraTx** hacia **queue0**.
+- Se envían los paquetes normalmente hacia los nodos, en nuestro caso enviamos paquetes desde el nodo **Node.traTx** hacia **queue0**.
 
 Notar que en nuestra red podemos tener dos situaciones de cuello de botella:
 
@@ -197,20 +197,30 @@ Notar que en nuestra red podemos tener dos situaciones de cuello de botella:
 
 Para ello nuestro protocolo intenta detectar antes que se sature alguno de ellos, esto lo logramos revisando que no se supere la cota.
 
-<!-- FIXME: Explicar que el nodeRX ENVÍA TODO EL TIEMPO EL ESTADO DE LA RED. -->
-
-- Si la taza de transferencia entre **TraTx** ----> **queue0** es igual a la taza de transferencia entre **queue0** ----> **TraRx** entonces los paquetes serán enviado mientras van llegando y por lo tanto no se almacenarán en el buffer **queue0**.
-- Supongamos ahora que la taza de transferencia de **queue0** ----> **TraRx** es de `0.5 Mbps` y **TraTx** ----> **queue0** es de `1 Mbps` que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente.
-- Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente, cuando supere la cota ya sea
-  `cota1=160` o `cota2=100`.
-- Nuestro algoritmo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola,
+## Caso 1: Que se sature el buffer **queue0**.
+- Supongamos ahora que la taza de transferencia de **queue0** ----> **ModeTx.traRx** es menor que la taza de transferencia **NodeTx.traTx** ----> **queue0** que en general es uno de nuestro caso de estudio, en este caso se produce un cuello de botella con lo cual los paquete que van llegado a **queue0** irán almacenandose continuadamente.
+- Irremediablemente si continuamos enviando paquetes, el buffer **queue0** se irá llenando gradualmente.
+- Cuando se supere la cota, nuestro protocolo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola del **queue0**,
   que será enviado inmediatamente a **NodeRx** que este a su vez tiene un mecanismo que identifica este paquete como importante.
-- Cuando lo detecta enviamos un paquete hacia el buffer **queue1** que este a su vez envia el paquete a **NodeTx** diciendole que deje de enviar paquetes para evitar la saturación de los bufferes.
-- Cuando el último buffer deje superar la cota establecida, creamos un paquete que al igual que antes será enviado inmediatamente ya sea desde **queue0** si el último buffer que dejó de superar la cota fue `queue0` o directamete desde **TraRx** si el último buffer que dejó de superar la cota es el buffer interno del nodo **TraRx**.
-- Este paquete será enviado mediante la ruta **TraRx** ----> **queue1** ----> **TraTx** avisando que los bufferes ya no superan la cota entonces se puede continuar con la transmisión.
+- Cuando lo detecta enviamos un paquete (indicando que se debe parar la trasnmisión) hacia el buffer **queue1** que éste a su vez envia el paquete a **NodeTx** imdicando que se dejen de enviar paquetes para evitar la saturación de los buffers.
+- En nuestro algoritmo, **NodeRx** envia constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
+- Mientras **NodeTx** no reciba un paquete que indique que deba parar la transmisión, éste seguirá retransmitiendo.
+- Una vez que **NodeTx** paró de transmitir porque recibió un paquete indicando que debía para, este seguirá sin retransmitir hasta que le indiquen lo contrario.   
+- Cuando los buffers dejen de superar la cota establecida, el último buffer que dejó de superar la cota, enviará un paqute hacia **TraTx** indicando que reanude la retransmisión, para el caso 1, el buffer **queue0** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
+
+
+## Caso 2: Que se sature el buffer de **NodeRx.traRx**..
+- Supongamos ahora que la congestón se produce en el buffer interno de **NodeRx** es decir en **NodeTx.traTx**, en este caso se produce un cuello de botella con lo cual los paquete que van llegando al buffer interno de **NodeRx** irán almacenandose continuadamente.
+- Al igual que en el caso 1, si continuamos enviado paquetes, el buffer interno se irá llenando gradualmente.
+- Cuando se supere la cota del buffer interno, nuestro protocolo detectará esto, por lo cual se enviará un paquete desde **NodeRx** hacia **queue1** para que este lo envia a **NodeTx** indicando que se pare la transmisión.
+- Análogamente a lo anterior **NodeRx** envia constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
+- Mientras no se supere la cota del buffer interno de **NodeRx**, éste seguirá enviando mensajes a **queue1** para que siga la transmisión de paquetes.
+- Una vez que el buffer interno deje de superar la cota, se enviará un paquete a **queue1** hacia **NodeTx** indicando la reanudación de la trasnmisión. 
+
+
 
 Entonces en resumidas cuentas, nuestro protoclo detecta cuando los bufferes superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes
-con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detectetn que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así susecivamenet.
+con lo cual los paquetes del emisor irán almacenandose en su buffer interno, cuando se detecteten que todos los bufferes ya no superan las cotas, entonces se envia nuevamente un paquete al emisor avisandole que puede restablecer el envio de los paquetes y así sucesivamente.
 Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulacón, nuestro protocolo se establecerá en un valor fijo de paquete que se envia y paquetes almacenados en los bufferes como pueden ver en las imagenes siguientes.
 
 <!--
