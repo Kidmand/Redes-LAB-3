@@ -138,13 +138,9 @@ Claramente se ve como la única queue que descarta paquetes es la de **NodeNx** 
 <!--
 En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE DE TAREA ANÁLISIS:
 - ¿Qué diferencia observa entre el caso de estudio 1 y 2?
-
--- FIXME: Completar con imagenes, si explico despues me lo borran.
-
 - ¿Cuál es la fuente limitante en cada uno?
--- FIXME: Completen también con imagenes y explicar.
+-- FIXME: Completen también con imágenes (están en el tanembaun).
 - Investigue sobre la diferencia entre control de flujo y control de congestión (ver Figura 6-22 del libro Tanenbaum).
-
 -->
 
 El control de flujo y el control de congestión son dos conceptos fundamentales en redes de computadoras que se relacionan con la administración del tráfico de datos, pero tienen objetivos y enfoques diferentes:
@@ -277,7 +273,7 @@ Una sección con los logros, limitaciones y posibles mejoras de nuestro algoritm
 
 Como logro en nuestro protocolo de control de flujo y congestion tenemos que para redes con tamaños de buffers suficientemente grandes y tasas de transferencias no tan alejadas, resuelve por completo la perdida de paquetes, además al trabajar con colas en buffers incluso llegan en orden.
 Por otra parte es interesante notar que al ejecutar el protocolo al principio no conoce mucho las red, pero a medida que pasa el tiempo consigue enviar la mayor tasa de transferencia posible sin perdida de paquetes y mantenerse en un rango aceptable en la transmisión de paquetes.
-Incluso los paquetes de control que viajan por la ruta de datos, al ser tan pequeños (1Byte) y enviados la menor cantidad de veces posible no influye casi nada en la carga útil<!-- FIXME: o ofrecida ? -->. Conseguimos un algoritmo que resuelve tanto el problema de control de flujo y congestión de forma efectiva si se dan las condiciones.
+Incluso los paquetes de control que viajan por la ruta de datos, al ser tan pequeños (1Byte) y enviados la menor cantidad de veces posible no influye casi nada en la carga útil. Conseguimos un algoritmo que resuelve tanto el problema de control de flujo y congestión de forma efectiva si se dan las condiciones.
 
 Veamos las limitaciones, notar que al trabajar con cotas en porcentajes, si los tamaños de los buffers disminuyen, puede haber perdida de paquetes. Nuestro protocolo aprovecha ese porcentaje restante de paquetes que saturan los buffers utilizando ese tiempo para controlar la red y dejar de enviar paquetes, si estos son muy pocos no se va enterar el nodoTx a tiempo y se van a perder paquetes que luego no retransmitimos en nuestro protocolo.
 
