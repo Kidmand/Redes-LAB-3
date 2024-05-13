@@ -302,40 +302,38 @@ Las graficas de `Carga ofrecida vs carga util` se hicieron cambiando para cada p
 Network.nodeTx.gen.generationInterval=exponential(0.1)
 Con los siguientes valores: 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.8, 1.6, 3.2
 Donde podemos notar lo siguiente:
-- Claramente la carga ofrecida aumentara de forma inversamente proporcional.
-- La carga util para valores chicos de carga ofrecida sera similar.
-- mientras crece la carga ofrecida, la carga util lo hara a menor ritmo. Esto es gracias al aumento de la complegidad del sistema requiriendo que en vez de enviarse paquetes, se envien feedback para la administracion del sistema.
-- la carga util crece hasta cierto punto. Este limite se debe a la capacidad del sistema.
-- al llegar a la cima, la carga util ira empeorando (tendera a la baja) por el costo de los feedback. En nuetro caso no son muy costosos por lo que apenas se notaran.
+
+- Claramente la carga ofrecida aumentara de forma inversamente proporcional al aumento del generationInterval.
+- La carga util y carga ofrecida es igual al inicio, en valores chicos.
+- Mientras crece la carga ofrecida, la carga util lo hara a menor ritmo. Esto es gracias al aumento de la complegidad del sistema requiriendo que en vez de enviarse paquetes, se envien feedback para la administracion del sistema.
+- La carga util crece hasta cierto punto. Este limite se debe a la capacidad del sistema.
+<!-- - Al llegar a la cima, la carga util ira empeorando (tendera a la baja) por el costo de los feedback. En nuetro caso no son muy costosos por lo que apenas se notaran. -->
 
 Las graficas de todos ambas partes y casos son iguales. De la siguente forma:
 ![Carga util vs Carga ofrecida](/GRAFICAS/CUtil-vs-COfrecida-P1-C1.png){width=auto height=500}
 
-Para una mejor visualizacion de los datos hicimos la misma grafica pero de `Carga util vs log(Carga ofrecida)` 
-Esta es una mejor forma para visualizar datos cada vez mas dispersos como en nuestro caso, ademas ayuda a ver el crecimiento relativo y no absoluto como en la anterior grafica de los datos.
+Para una mejor visualizacion de los datos hicimos la misma grafica pero de `Carga util vs log(Carga ofrecida)`.
+Esta es una mejor forma para visualizar datos que son cada vez mas dispersos como en nuestro caso, ademas ayuda a ver el crecimiento relativo y no absoluto como en la anterior grafica.
 ![Carga util vs log(Carga ofrecida)](/GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=auto height=500}
 
 Las graficas de `delay` indican el tiempo que le toma a cada paquete consumirse desde que se creo.
-En la parte 2, la grafica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: no se si es correcta esta hipotesis/observacion-->(seria interesante ver un grafico donde pase, al aumentar el generationInterval o dejar correr la simulacion mas tiempo), en nuetro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
+En la `parte 2`, la grafica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: no se si es correcta esta hipotesis/observacion-->(seria interesante ver un grafico donde pase, al aumentar el generationInterval o dejar correr la simulacion mas tiempo), en nuetro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
 ![Delay](/GRAFICAS/Delay-P2-C1.png){width=auto height=500}
-
-Podemos ver en la siguiente grafica la `cantidad de paquetes generados vs los paquetes en el sistema` para visualizar desde otra perspectiva el mismo asunto. Los paquetes en el sistema son la cantidad de paquetes generados menos los dropeados (ninguno en este caso) y los paquetes consumidos.
+Podemos ver en la siguiente grafica de la `cantidad de paquetes generados vs los paquetes en el sistema` que se mantiene nuestra hipotesis, los paquetes se van almacenando en la red provocando nuevamente una tendencia al alza de la cantidad de paquetes en el sistema. Los paquetes en el sistema son la cantidad de paquetes generados menos los dropeados (ninguno en este caso) y los paquetes consumidos.
 ![cantidad de paquetes generados vs los paquetes en el sistema](/GRAFICAS/Pks-Dentro-P2-C1.png){width=auto height=500}
-
-en la siguiente grafica de los `paquetes salientes del sistema` podremos ver como van consumiendo los paquetes:
+En la siguiente grafica de los `paquetes salientes del sistema` podremos ver la consumicion de los paquetes:
 ![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P2-C1.png){width=auto height=500}
+Recordar que estas son las variables que se resta a la cantidad de paquetes generados para obtener la cantidad de paquetes aun dentro del sistema.
 
-En la parte 1, podemos ver como el `delay` se estabiliza llegado un punto.
+En la `parte 1`, podemos ver como el `delay` crece de la misma forma hasta que se estabiliza llegado un punto.
 ![Delay](/GRAFICAS/Delay-P1-C1.png){width=auto height=500}
-A su vez ocurre algo similar con la `cantidad de paquetes generados vs los paquetes en el sistema` que ademas, ocurre antes. esto es porque <!-- Completar... -->
+A su vez ocurre algo similar con la `cantidad de paquetes generados vs los paquetes en el sistema`.
 ![cantidad de paquetes generados vs los paquetes en el sistema](/GRAFICAS/Pks-Dentro-P1-C1.png){width=auto height=500}
 La causa de todo esto la podemos ver claramente en el siguiente grafico de los `paquetes salientes del sistema`
 ![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P1-C1.png){width=auto height=500}
 Esta grafica si cambia entre ambos casos, pero su influencia es igual.
 ![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P1-C2.png){width=auto height=500}
-La causa de todo esto es que la red alcanzo su capacidad maxima y empezo a dropear paquetes, de esta forma se "estabiliza" la red ya que no puede aguantar mas paquetes.
-
-
+La causa de todo esto es que la red alcanzo su capacidad maxima y empezo a dropear paquetes, de esta forma se "estabiliza" la red ya que no puede soportar mas paquetes.
 
 ---
 
