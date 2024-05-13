@@ -298,6 +298,29 @@ FIXME: Gráficas pendientes por explicar:
   - Carga ofrecida vs carga util.
 -->
 
+Las graficas de `Carga ofrecida vs carga util` se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generacion de paquetes:
+Network.nodeTx.gen.generationInterval=exponential(0.1)
+Con los siguientes valores: 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.8, 1.6, 3.2
+Donde podemos notar lo siguiente:
+- Claramente la carga ofrecida aumentara de forma inversamente proporcional.
+- La carga util para valores chicos de carga ofrecida sera similar.
+- mientras crece la carga ofrecida, la carga util lo hara a menor ritmo. Esto es gracias al aumento de la complegidad del sistema requiriendo que en vez de enviarse paquetes, se envien feedback para la administracion del sistema.
+- la carga util crece hasta cierto punto. Este limite se debe a la capacidad del sistema.
+- al llegar a la cima, la carga util ira empeorando (tendera a la baja) por el costo de los feedback. En nuetro caso no son muy costosos por lo que apenas se notaran.
+
+Las graficas de `delay` indican el tiempo que le toma a cada paquete consumirse desde que se creo.
+ En la parte 2, la grafica esta en contante crecimiento, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: -->(seria interesante ver un grafico donde pase, al aumentar el generationInterval o dejar correr la simulacion mas tiempo), en nuetro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
+Podemos ver en la siguiente grafica la `cantidad de paquetes generados vs los paquetes en el sistema` para visualizar desde otra perspectiva el mismo asunto. Los paquetes en el sistema son la cantidad de paquetes generados menos los dropeados (ninguno en este caso) y los paquetes consumidos.
+en la siguiente grafica de los `paquetes salientes del sistema` podremos ver como van consumiendo los paquetes:
+
+
+En la parte 1, podemos ver como el `delay` se estabiliza llegado un punto.
+A su vez ocurre algo similar con la `cantidad de paquetes generados vs los paquetes en el sistema` que ademas, ocurre antes. esto es porque <!-- Completar... -->
+La causa de todo esto la podemos ver claramente en el siguiente grafico de los `paquetes salientes del sistema`
+La causa de todo esto es que la red alcanzo su capacidad maxima y empezo a dropear paquetes, de esta forma se "estabiliza" la red ya que no puede aguantar mas paquetes.
+
+
+
 ---
 
 ## Discusiones:
