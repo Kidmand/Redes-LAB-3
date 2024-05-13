@@ -10,7 +10,7 @@ Para ello diseñamos un protocolo de control de flujo y congestión inspirándon
 Obtenemos conclusiones mediante gráficos y el modelo de red en base a los datos obtenidos de la simulación.
 
 ---
- 
+
 ## Introducción:
 
 <!--
@@ -27,7 +27,7 @@ Las redes están formadas por distintos tipos de nodos que:
 - Retransmiten/procesan paquetes.
 - Consumen paquetes (sumidero).
 
-![Red Básica](/IMGs/red-basica.png){width=250 height=auto}
+![Red Básica](./IMGs/red-basica.png){width=250 height=auto}
 
 El principal objetivo de una red es transmitir paquetes de un punto a otro. Pero al analizar distintos casos de estudio, podemos darnos cuenta de un problema, se pierden paquetes y nunca llegan a destino.
 
@@ -83,11 +83,12 @@ Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abs
 
 Luego tenemos los siguientes enlaces que conectan los nodos en la red:
 
-![Red parte 1](/IMGs/red-parte1.png){width=250 height=auto}
+![Red parte 1](./IMGs/red-parte1.png){width=250 height=auto}
 
 Pero internamente **NodeTx** y **NodeRx** tienen los siguientes enlaces:
 
-![NodeTx parte 1](/IMGs/NodeTx-parte1.png){width=auto height=250} ![NodeRx parte 1](/IMGs/NodeRx-parte1.png){width=auto height=250}
+![NodeTx parte 1](./IMGs/NodeTx-parte1.png){width=auto height=250} ![NodeRx parte 1](./IMGs/NodeRx-parte1.png){width=auto height=250}
+
 Los casos de estudio son:
 
 - **Caso 1**:
@@ -105,7 +106,7 @@ Ejecutamos la simulación durante `200s` para cada caso y obtuvimos las siguient
 
 En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
-![Ocupación de buffers parte 1 - caso 1](/GRAFICAS/buffers-parte1-caso1.png){width=auto height=500}
+![Ocupación de buffers parte 1 - caso 1](./GRAFICAS/buffers-parte1-caso1.png){width=auto height=500}
 
 Analizando, podemos notar tres cosas:
 
@@ -115,7 +116,7 @@ Analizando, podemos notar tres cosas:
 
 Veamos ahora cuando y donde se descartan paquetes:
 
-![Paquetes descartados parte 1 - caso 1](/GRAFICAS/pkt-descartados-parte1-caso1.png){width=auto height=320}
+![Paquetes descartados parte 1 - caso 1](./GRAFICAS/pkt-descartados-parte1-caso1.png){width=auto height=320}
 
 En la gráfica podemos ver claramente como la única parte donde se descartan paquetes es en el buffer de **NodeRx.queue**. Esto se debe justamente al **cuello de botella** que mencionamos anteriormente. Notar que el tiempo en el que se descartan paquetes es a partir de los `40s` aproximadamente y coincide con el momento en el que el buffer de **NodeRx** empieza a mantenerse constante en `200` paquetes.
 
@@ -123,7 +124,7 @@ En la gráfica podemos ver claramente como la única parte donde se descartan pa
 
 En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del tiempo:
 
-![Ocupación de buffers parte 1 - caso 2](/GRAFICAS/buffers-parte1-caso2.png){width=auto height=500}
+![Ocupación de buffers parte 1 - caso 2](./GRAFICAS/buffers-parte1-caso2.png){width=auto height=500}
 
 Analizando, podemos compáralo con el caso anterior y notar que:
 
@@ -133,7 +134,7 @@ Analizando, podemos compáralo con el caso anterior y notar que:
 
 Veamos ahora cuando y donde se descartan paquetes:
 
-![Paquetes descartados parte 1 - caso 2](/GRAFICAS/pkt-descartados-parte1-caso2.png){width=auto height=320}
+![Paquetes descartados parte 1 - caso 2](./GRAFICAS/pkt-descartados-parte1-caso2.png){width=auto height=320}
 
 Claramente se ve como la única queue que descarta paquetes es la de **NodeNx** debido a lo mencionado anteriormente. Notar que ocurre lo mismo que en el caso anterior, a partir de los `40s` aproximadamente.
 
@@ -146,7 +147,7 @@ En el enunciado dice que hay que contestar las siguientes preguntas de la PARTE 
 
 El control de flujo y el control de congestión son dos conceptos fundamentales en redes de computadoras que se relacionan con la administración del tráfico de datos, pero tienen objetivos y enfoques diferentes, veamos una imagen representativa de esto y analicemos la diferencia entre ambos conceptos:
 
-![Control de flujo y congestión](/IMGs/congestion-y-flujo.jpeg){width=auto height=400}
+![Control de flujo y congestión](./IMGs/congestion-y-flujo.jpeg){width=auto height=400}
 
 **Control de flujo:**
 
@@ -175,17 +176,19 @@ Una sección que describir nuestra propuesta de solución:
 
 A continuación presentamos algunas modificación que se hicieron en la red:
 
-![Red parte 2](/IMGs/red-parte2.png){width=auto height=auto}
+![Red parte 2](./IMGs/red-parte2.png){width=350 height=auto}
 
 Notar que ahora tenemos dos **queue** intermedios, pero uno es unicamente para manejar paquetes de control, que serán enviados por el protocolo que diseñamos.
 
 Por otra parte también se modificaron los enlaces internos de **NodeTx** y **NodeRx**:
 
 El funcionamiento de **traTx** es similar que al de la **queue** nada mas que ahora no solo envía paquetes a **queue0** sino que también puede recibir paquetes de **queue1** y procesarlos.
-![NodeTx parte 2](/IMGs/NodeTx-parte2.png){width=auto height=250}
+
+![NodeTx parte 2](./IMGs/NodeTx-parte2.png){width=auto height=250}
 
 El funcionamiento de **traRx** es similar que al de la **queue** nada mas que ahora no solo recibe paquetes de **queue0** sino que también puede enviar paquetes a **queue1** de control.
-![NodeRx parte 2](/IMGs/NodeRx-parte2.png){width=auto height=250}
+
+![NodeRx parte 2](./IMGs/NodeRx-parte2.png){width=auto height=250}
 
 ### Protocolo diseñado: **UMBRAL && ESPERA**
 
@@ -274,7 +277,7 @@ Para crear las gráficas de todo el informe que representen los diferentes resul
 Como hicimos en la introducción, empecemos analizando las capacidades de los buffers para poder observar la pérdida de paquetes, lo cuál es el objetivo.
 A continuación les mostramos las gráficas de los dos casos de estudio en donde podemos ver el funcionamiento de nuestro protocolo.
 
-![Ocupación de buffers parte 2 - caso 1](/GRAFICAS/buffers-parte2-caso1.png){width=auto height=500} ![Ocupación de buffers parte 2 - caso 2](/GRAFICAS/buffers-parte2-caso2.png){width=auto height=500}
+![Ocupación de buffers parte 2 - caso 1](./GRAFICAS/buffers-parte2-caso1.png){width=auto height=500} ![Ocupación de buffers parte 2 - caso 2](./GRAFICAS/buffers-parte2-caso2.png){width=auto height=500}
 
 Comportamiento de los distintos componentes:
 
@@ -289,7 +292,7 @@ Comportamiento de los distintos componentes:
 
 Cabe destacar que si observamos muy detenidamente los gráficos, en resumidas cuenta, estos explican detalladamente el comportamiento de nuestro protocolo. Es decir, que las distintas partes de los gráfico están diciendo algo muy importante sobre cómo es que funciona el protocolo. Por ejemplo como mencionamos antes, la parte del gráfico del nodo **Nx** del segundo caso de estudio después de un determinado tiempo se establece la cota del buffer **Nx** en un almacenamiento de aproximadamente 160 paquetes y luego se mantiene el almacenamiento en un rango de **`150--170`** paquetes durante toda la simulación restante. Esto sucede debido a que nuestro protocolo cada vez que el buffer supera su cota establecida lo detecta y le dice al emisor que pare, una vez que el buffer deja de superar su cota, el emisor comienza nuevamente a retransmitir.
 
-Otro punto importante a mencionar es la parte del gráfico del nodo **Tx caso 1** que a partir de los **`25seg`** el crecimiento del almacenamiento del buffer es lineal. Entonces observando detenidamente el gráfico de **Nx caso 1** vemos que justamente el almacenamiento del buffer se estabiliza justo a los **`25seg`**, este comportamiento no es casualidad, ya que se produce cuando el buffer supera su cota establecida, que para el **caso 1** la cota del buffer es de **`100`** paquetes, por lo cual una vez que se supere la cota, el nodo **Tx** dejará de enviar paquetes hacia el nodo **Nx** almacenando dichos paquetes en su buffer interno, que es justamente esto lo que podemos ver en las gráficas. El crecimiento del almacenamiento del buffer es lineal a partir de la primera saturación **(se pasa de la cota establecida)** del buffer. 
+Otro punto importante a mencionar es la parte del gráfico del nodo **Tx caso 1** que a partir de los **`25seg`** el crecimiento del almacenamiento del buffer es lineal. Entonces observando detenidamente el gráfico de **Nx caso 1** vemos que justamente el almacenamiento del buffer se estabiliza justo a los **`25seg`**, este comportamiento no es casualidad, ya que se produce cuando el buffer supera su cota establecida, que para el **caso 1** la cota del buffer es de **`100`** paquetes, por lo cual una vez que se supere la cota, el nodo **Tx** dejará de enviar paquetes hacia el nodo **Nx** almacenando dichos paquetes en su buffer interno, que es justamente esto lo que podemos ver en las gráficas. El crecimiento del almacenamiento del buffer es lineal a partir de la primera saturación **(se pasa de la cota establecida)** del buffer.
 
 <!--
 FIXME: Gráficas pendientes por explicar:
@@ -310,29 +313,44 @@ Donde podemos notar lo siguiente:
 <!-- - Al llegar a la cima, la carga util ira empeorando (tendera a la baja) por el costo de los feedback. En nuestro caso no son muy costosos por lo que apenas se notaran. -->
 
 Las gráficas de todos ambas partes y casos son iguales. De la siguiente forma:
-![Carga util vs Carga ofrecida](/GRAFICAS/CUtil-vs-COfrecida-P1-C1.png){width=800 height=auto}
+
+![Carga util vs Carga ofrecida](./GRAFICAS/CUtil-vs-COfrecida-P1-C1.png){width=auto height=250}
 
 Para una mejor visualización de los datos hicimos la misma gráfica pero de `Carga util vs log(Carga ofrecida)`.
 Esta es una mejor forma para visualizar datos que son cada vez mas dispersos, como en nuestro caso. Ademas ayuda a ver el crecimiento relativo y no absoluto como en la anterior gráfica.
-![Carga util vs log(Carga ofrecida)](/GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=800 height=auto}
+
+![Carga util vs log(Carga ofrecida)](./GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=auto height=250}
 
 Las gráficas de `delay` indican el tiempo que le toma a cada paquete consumirse desde que se creo.
-En la `parte 2`, la gráfica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: no se si es correcta esta hipotesis/observacion-->(seria interesante ver un gráfico donde pase, al aumentar el generationInterval o dejar correr la simulación mas tiempo), en nuestro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
-![Delay](/GRAFICAS/Delay-P2-C1.png){width=800 height=auto}
-Podemos ver en la siguiente gráfica de la `cantidad de paquetes generados vs los paquetes en el sistema` que se mantiene nuestra hipótesis, los paquetes se van almacenando en la red provocando nuevamente una tendencia al alza de la cantidad de paquetes en el sistema. Los paquetes en el sistema son la cantidad de paquetes generados menos los descartados (ninguno en este caso) y los paquetes consumidos.
-![cantidad de paquetes generados vs los paquetes en el sistema](/GRAFICAS/Pks-Dentro-P2-C1.png){width=800 height=auto}
-En la siguiente gráfica de los `paquetes salientes del sistema` podremos ver la consumición de los paquetes:
-![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P2-C1.png){width=800 height=auto}
-Recordar que estas son las variables que se resta a la cantidad de paquetes generados para obtener la cantidad de paquetes aun dentro del sistema.
+En la `parte 2`, la gráfica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: no se si es correcta esta hipótesis/observación-->(seria interesante ver un gráfico donde pase, al aumentar el generationInterval o dejar correr la simulación mas tiempo), en nuestro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
 
+![Delay](./GRAFICAS/Delay-P2-C1.png){width=auto height=250}
+
+Podemos ver en la siguiente gráfica de la `cantidad de paquetes generados vs los paquetes en el sistema` que se mantiene nuestra hipótesis, los paquetes se van almacenando en la red provocando nuevamente una tendencia al alza de la cantidad de paquetes en el sistema. Los paquetes en el sistema son la cantidad de paquetes generados menos los descartados (ninguno en este caso) y los paquetes consumidos.
+
+![cantidad de paquetes generados vs los paquetes en el sistema](./GRAFICAS/Pks-Dentro-P2-C1.png){width=auto height=250}
+
+En la siguiente gráfica de los `paquetes salientes del sistema` podremos ver la consumición de los paquetes:
+
+![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P2-C1.png){width=auto height=250}
+
+Recordar que estas son las variables que se resta a la cantidad de paquetes generados para obtener la cantidad de paquetes aun dentro del sistema.
 En la `parte 1`, podemos ver como el `delay` crece de la misma forma hasta que se "estabiliza" llegado un punto.
-![Delay](/GRAFICAS/Delay-P1-C1.png){width=800 height=auto}
+
+![Delay](./GRAFICAS/Delay-P1-C1.png){width=auto height=250}
+
 A su vez ocurre algo similar con la `cantidad de paquetes generados vs los paquetes en el sistema`.
-![cantidad de paquetes generados vs los paquetes en el sistema](/GRAFICAS/Pks-Dentro-P1-C1.png){width=800 height=auto}
-La causa de todo esto la podemos ver claramente en el siguiente gráfico de los `paquetes salientes del sistema`
-![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P1-C1.png){width=800 height=auto}
+
+![cantidad de paquetes generados vs los paquetes en el sistema](./GRAFICAS/Pks-Dentro-P1-C1.png){width=auto height=250}
+
+La causa de todo esto la podemos ver claramente en el siguiente gráfico de los `paquetes salientes del sistema`.
+
+![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P1-C1.png){width=auto height=250}
+
 Esta gráfica si cambia entre ambos casos, pero su influencia es igual.
-![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P1-C2.png){width=800 height=auto}
+
+![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P1-C2.png){width=auto height=250}
+
 La causa de todo esto es que la red alcanzo su capacidad maxima y empezó a descartar paquetes causando esta "estabilidad" en los anteriores gráficos.
 Notar que mas que estabilidad, se alcanzo un techo en el sistema. Se alcanzo el limite de su capacidad.
 
