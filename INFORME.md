@@ -320,6 +320,7 @@ Para una mejor visualización de los datos hicimos la misma gráfica pero de `Ca
 Esta es una mejor forma para visualizar datos que son cada vez mas dispersos, como en nuestro caso. Ademas ayuda a ver el crecimiento relativo y no absoluto como en la anterior gráfica.
 
 ![Carga util vs log(Carga ofrecida)](./GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=auto height=250}
+El grafico se hizo aplicandole a cada dato del eje x logaritmo natural para una mejor visualizacion de la tendencia de los datos.
 
 Las gráficas de `delay` indican el tiempo que le toma a cada paquete consumirse desde que se creo.
 En la `parte 2`, la gráfica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: no se si es correcta esta hipótesis/observación-->(seria interesante ver un gráfico donde pase, al aumentar el generationInterval o dejar correr la simulación mas tiempo), en nuestro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
