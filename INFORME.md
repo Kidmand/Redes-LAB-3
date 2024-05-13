@@ -245,6 +245,7 @@ Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulaci�
 - Tenemos cotas en lo buffers para evitar la saturación de los mismos.
 - Cuando detectamos que algunos de los buffers supera su cota establecida, enviamos un mensaje/paquete al emisor para que detenga la transmisión.
 - Una vez que los buffers dejan de superar su cota establecida, se envía un mensaje/paquete al emisor para que se reanude la transmisión de los paquetes.
+- Al tener pocos paquetes de control no influye tanto en la utilidad de la red.
 
 Todo esto evitaría que se pierdan paquetes por saturación de buffers
 
@@ -294,15 +295,56 @@ Cabe destacar que si observamos muy detenidamente los gráficos, en resumidas cu
 
 Otro punto importante a mencionar es la parte del gráfico del nodo **Tx caso 1** que a partir de los **`25seg`** el crecimiento del almacenamiento del buffer es lineal. Entonces observando detenidamente el gráfico de **Nx caso 1** vemos que justamente el almacenamiento del buffer se estabiliza justo a los **`25seg`**, este comportamiento no es casualidad, ya que se produce cuando el buffer supera su cota establecida, que para el **caso 1** la cota del buffer es de **`100`** paquetes, por lo cual una vez que se supere la cota, el nodo **Tx** dejará de enviar paquetes hacia el nodo **Nx** almacenando dichos paquetes en su buffer interno, que es justamente esto lo que podemos ver en las gráficas. El crecimiento del almacenamiento del buffer es lineal a partir de la primera saturación **(se pasa de la cota establecida)** del buffer.
 
+Como vimos en la introducción, el principal problema que tenia la red es que los buffers llegaban a su máxima capacidad y se empezaban a descartar paquetes. Veamos que pasa con esos buffers con el protocolo funcionando con una gráfica:
+
 <!--
-FIXME: Gráficas pendientes por explicar:
-  - Paquetes descartados.
-  - Deley.
-  - Carga ofrecida vs carga util.
+FIXME: Actualizar el gráfico usando los nombres mejorados
 -->
 
-Las gráficas de `Carga ofrecida vs carga util` se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generación de paquetes:
-`Network.nodeTx.gen.generationInterval=exponential(0.1)`
+![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P2-C1.png){width=auto height=250}
+
+Como podemos ver tenemos cuatro variables, las analicemos:
+
+- Pkt Consumidos: Esta representa los paquetes que efectivamente llegaron a su destino, es decir que llegaron a Rx.Sink correctamente.
+- Pkt Descartados: Ninguno de los buffers (Rx.Queue, Tx.Queue y Nx.Queue0) descarta paquetes debido a que nuestro protocolo evita la saturación de los buffers.
+
+Concluimos de ésta gráfica que no se descartan paquetes en ningún momento de la simulación, pero esto no significa que se dejen de generar. Como en nuestros casos de estudio se consumen los paquetes a un menor ritmo, éstos se almacenarán en algún buffer de la red, que se llenará sin saturarse, como anteriormente lo vimos en las gráficas que representaban la ocupación de los buffers con el protocolo funcionando, específicamente sucede en el **NodoTx.Queue**. Veamos que está pasando con estos paquetes.
+
+<!-- Entonces, al generarse paquetes mas rápido de los que se consumen, se guardan en algún buffer dentro de la red. Por lo tanto cada vez habra mas paquetes dentro del sistema, y eso lo podemos ver en la siguiente grafica:
+![cantidad de paquetes generados vs los paquetes en el sistema](./GRAFICAS/Pks-Dentro-P1-C1.png){width=auto height=250}
+
+Como podemos ver cada vez hay mas paquetes dentro del sistema. Esto significa que cada vez mas, los paquetes generados tardaran mas en consumirse debido al aumento de la cola de paquetes en los buffers. Al tiempo que tarda un paquete entre que se genera y se consume lo llamamos delay. y como podemos ver en la siguiente grafica, aumenta de forma proporcional.
+![Delay parte 1 - caso 1](./GRAFICAS/Delay-P1-C1.png){width=auto height=250} -->
+
+Primero, introducimos el término "Tiempo de vida del paquete", es decir el tiempo que le toma a un paquete desde que se genera hasta que se consume. Otra forma de llamarlo es el "Delay del paquete". Antes que nada veamos que pasaba con esto en la red de la parte 1:
+
+![Delay parte 1 - caso 1](./GRAFICAS/Delay-P1-C1.png){width=auto height=250}
+
+> Obs: Ésta gráfica es igual para ambos casos de estudio, por lo que no se muestra la otra.
+
+Vemos como el **delay** llega a una especie de cota, en donde todos los paquetes tienen un tiempo de vida "máximo". Esto es debido a que los paquetes no se están almacenando en ningún lugar sino que se descartan.
+
+<!--
+FIXME: Agregar el otro gráfico que ayuda a entender el delay
+-->
+
+Ahora veamos que pasa con el **delay** en la parte 2:
+
+![Delay parte 2 - caso 1](./GRAFICAS/Delay-P2-C1.png){width=auto height=250}
+
+> Obs: Ésta gráfica es igual para ambos casos de estudio, por lo que no se muestra la otra.
+
+Vemos como no se ve ninguna cota en término del **delay**. Este aumenta aproximadamente lineal a lo largo de toda la simulación. Se debe a que los paquetes se generan a un mayor ritmo del que se consumen durante la simulación. Generando así que los paquetes se vayan almacenando en algún buffer (Tx.queue) cada vez por más tiempo ya que se generan más rápido de lo que se consumen.
+(Sería interesante ver un gráfico en donde se llegue a saturar el buffer al aumentar el generationInterval o dejar correr la simulación más tiempo)
+
+//////////////////////////////////////////////////////////////////////////////
+
+Las gráficas de **Carga ofrecida vs carga útil** se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generación de paquetes:
+
+```cpp
+Network.nodeTx.gen.generationInterval=exponential(0.1)
+```
+
 Con los siguientes valores: `0.05`, `0.1`, `0.15`, `0.2`, `0.3`, `0.4`, `0.8`, `1.6`, `3.2`
 Donde podemos notar lo siguiente:
 
@@ -320,10 +362,16 @@ Para una mejor visualización de los datos hicimos la misma gráfica pero de `Ca
 Esta es una mejor forma para visualizar datos que son cada vez mas dispersos, como en nuestro caso. Ademas ayuda a ver el crecimiento relativo y no absoluto como en la anterior gráfica.
 
 ![Carga util vs log(Carga ofrecida)](./GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=auto height=250}
-El grafico se hizo aplicandole a cada dato del eje x logaritmo natural para una mejor visualizacion de la tendencia de los datos.
+El gráfico se hizo aplicándole a cada dato del eje x logaritmo natural para una mejor visualización de la tendencia de los datos.
 
+<!--
+FIXME: Gráficas pendientes por explicar:
+  - Carga ofrecida vs carga util.
+-->
+
+<!--
 Las gráficas de `delay` indican el tiempo que le toma a cada paquete consumirse desde que se creo.
-En la `parte 2`, la gráfica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!--FIXME: no se si es correcta esta hipótesis/observación-->(seria interesante ver un gráfico donde pase, al aumentar el generationInterval o dejar correr la simulación mas tiempo), en nuestro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
+En la `parte 2`, la gráfica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!- FIXME: no se si es correcta esta hipótesis/observación -> (seria interesante ver un gráfico donde pase, al aumentar el generationInterval o dejar correr la simulación mas tiempo), en nuestro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
 
 ![Delay](./GRAFICAS/Delay-P2-C1.png){width=auto height=250}
 
@@ -355,7 +403,9 @@ Esta gráfica si cambia entre ambos casos, pero su influencia es igual.
 La causa de todo esto es que la red alcanzo su capacidad maxima y empezó a descartar paquetes causando esta "estabilidad" en los anteriores gráficos.
 Notar que mas que estabilidad, se alcanzo un techo en el sistema. Se alcanzo el limite de su capacidad.
 
-Podemos concluir que al introducirse paquetes dentro de una red mas rápido de lo que pueden llegar a consumirse, los paquetes deberán ser almacenados dentro de la red. Llegado ese punto, ante una constante generación de paquetes superior a una constante consumición de los mismos, podemos decir que cada vez serán mas los paquetes almacenados en la res. A su vez, la red tiene una capacidad finita y ante un constante crecimiento de la cantidad de paquetes almacenados en la red, esta llegara a un limite y deberá empezar a descartarlos. Al dropear los paquetes, estos salen de la red. Por lo tanto llegados a ese punto, la cantidad de paquetes en el sistema se estabilizara y también la cantidad de paquetes en los buffers ocasionando que el delay de los paquetes también se estabilice.
+Podemos concluir que al introducirse paquetes dentro de una red mas rápido de lo que pueden llegar a consumirse, los paquetes deberán ser almacenados dentro de la red. Llegado ese punto, ante una constante generación de paquetes superior a una constante consumición de los mismos, podemos decir que cada vez serán mas los paquetes almacenados en la red.
+A su vez, la red tiene una capacidad finita y ante un constante crecimiento de la cantidad de paquetes almacenados en la red, esta llegara a un limite y deberá empezar a descartarlos. Al dropear los paquetes, estos salen de la red. Por lo tanto llegados a ese punto, la cantidad de paquetes en el sistema se estabilizara y también la cantidad de paquetes en los buffers ocasionando que el delay de los paquetes también se estabilice.
+-->
 
 ## Discusiones:
 
