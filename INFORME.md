@@ -325,7 +325,7 @@ En la siguiente grafica de los `paquetes salientes del sistema` podremos ver la 
 ![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P2-C1.png){width=auto height=500}
 Recordar que estas son las variables que se resta a la cantidad de paquetes generados para obtener la cantidad de paquetes aun dentro del sistema.
 
-En la `parte 1`, podemos ver como el `delay` crece de la misma forma hasta que se estabiliza llegado un punto.
+En la `parte 1`, podemos ver como el `delay` crece de la misma forma hasta que se "estabiliza" llegado un punto.
 ![Delay](/GRAFICAS/Delay-P1-C1.png){width=auto height=500}
 A su vez ocurre algo similar con la `cantidad de paquetes generados vs los paquetes en el sistema`.
 ![cantidad de paquetes generados vs los paquetes en el sistema](/GRAFICAS/Pks-Dentro-P1-C1.png){width=auto height=500}
@@ -333,9 +333,10 @@ La causa de todo esto la podemos ver claramente en el siguiente grafico de los `
 ![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P1-C1.png){width=auto height=500}
 Esta grafica si cambia entre ambos casos, pero su influencia es igual.
 ![paquetes salientes del sistema](/GRAFICAS/Pks-Salientes-P1-C2.png){width=auto height=500}
-La causa de todo esto es que la red alcanzo su capacidad maxima y empezo a dropear paquetes, de esta forma se "estabiliza" la red ya que no puede soportar mas paquetes.
+La causa de todo esto es que la red alcanzo su capacidad maxima y empezo a dropear paquetes causando esta "estabilidad" en los anteriores graficos.
+Notar que mas que estabilidad, se alcanzo un techo en el sistema. Se alcanzo el limite de su capacidad.
 
----
+Podemos concluir que al introducirse paquetes dentro de una red mas rapido de lo que pueden llegar a consumirse, los paquetes deberan ser almacenados dentro de la red. Llegado ese punto, ante una constante generacion de paquetes superior a una cosntante consumicion de los mismoc, podemos decir que cada vez seran mas los paquetes almacenados en la res. A su vez, la red tiene una capacidad finita y ante un constante crecimiento de la cantidad de paquetes almacenados en la red, esta llegara a un limite y debera empezar a dropearlos. Al dropear los paquetes, estos salen de la red. Por lo tanto llegados a ese punto, la cantidad de paquetes en el sistema se estabilizara y tambien la cantidad de paquetes en los bufferes ocacionando que el delay de los paquetes tambien se estabilice.
 
 ## Discusiones:
 
