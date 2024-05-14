@@ -307,7 +307,7 @@ FIXME: Actualizar el gráfico usando los nombres mejorados
 
 Como observamos, tenemos cuatro variables. Las analicemos:
 
-- **Pkt Consumidos:** Esta representa los paquetes que efectivamente llegaron a su destino, es decir que llegaron a **Rx.Sink** correctamente.
+- **Pkt Consumidos:** Esta representa los paquetes que efectivamente llegaron a su destino, es decir que llegaron a **Rx.Sink** correctamente. Notar que los paquetes de control no llegan al sink por lo tanto no se cuentan.
 - **Pkt Descartados:** Ninguno de los buffers **(Rx.Queue, Tx.Queue y Nx.Queue0)** descarta paquetes debido a que nuestro protocolo evita la saturación de los buffers.
 
 Concluimos de ésta gráfica que no se descartan paquetes en ningún momento de la simulación, pero esto no significa que se dejen de generar. Como en nuestros casos de estudio se consumen los paquetes a un menor ritmo, éstos se almacenarán en algún buffer de la red, que se llenará sin saturarse, como anteriormente lo vimos en las gráficas que representaban la ocupación de los buffers con el protocolo funcionando. Específicamente sucede en el **NodoTx.Queue**.
@@ -340,75 +340,55 @@ Ahora veamos que pasa con el **delay** en la parte 2:
 Vemos como no se ve ninguna cota en términos del **delay**. Este aumenta aproximadamente lineal a lo largo de toda la simulación. Se debe a que los paquetes se generan a un mayor ritmo del que se consumen durante la simulación. Generando así que los paquetes se vayan almacenando en algún buffer **(Tx.queue)** cada vez por más tiempo ya que se generan más rápido de lo que se consumen.
 (Sería interesante ver un gráfico en donde se llegue a saturar el buffer al aumentar el generationInterval o dejar correr la simulación más tiempo)
 
----
-Las gráficas de **Carga ofrecida vs carga útil** se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generación de paquetes:
+Como mecionamos al enunciar el protocolo, se utilizan paquetes de control (feedbackPackets) para evitar la perdida de paquetes. Analicemos como afecta a la utilidad de la red.
+Para esto definimos los conceptos de:
+
+- Carga ofrecida: Cantidad de paquetes generados.
+- Carga útil: Cantidad de paquetes consumidos en el sink. Recordemos que los paquetes de control nunca llegan al sink.
+
+Con el fin de analizar como afectan a la utilidad de la red, necesitamos ver cuales son los casos en los que la cantidad de paquetes de control cambiara influenciando nuestras estadisticas.
+
+Los paquetes de control se envian cada vez que cambia el estado del buffer de Nx o Rx de saturado a no saturado o viceversa. Por lo tanto, para variar el numero de paquetes de control debemos variar la cantidad de veces que se satura y desaturan sus buffers.
+
+Con este fin, variaremos la generacion de paquetes por segundo, osea el `generationInterval`.
+
+Para ello creamos las gráficas de **Carga ofrecida vs carga útil**. Estas se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generación de paquetes:
 
 ```cpp
-Network.nodeTx.gen.generationInterval=exponential(0.1)
+Network.nodeTx.gen.generationInterval=exponential(x)
 ```
 
-Con los siguientes valores: `0.05`, `0.1`, `0.15`, `0.2`, `0.3`, `0.4`, `0.8`, `1.6`, `3.2`
-Donde podemos notar lo siguiente:
+Con los siguientes valores en x: `0.05`, `0.1`, `0.15`, `0.2`, `0.3`, `0.4`, `0.8`, `1.6`, `3.2`.
 
-- Claramente la carga ofrecida aumentará de forma inversamente proporcional al aumento del generationInterval.
-- La carga útil y carga ofrecida es igual al inicio, osea en valores chicos.
-- Mientras crece la carga ofrecida, la carga útil lo hará a menor ritmo. Esto es gracias al aumento de la complejidad del sistema requiriendo que en vez de enviarse paquetes, se envíen feedback para la administración del sistema.
-- La carga útil crece hasta cierto punto, este límite se debe a la capacidad del sistema.
-<!-- - Al llegar a la cima, la carga util ira empeorando (tendera a la baja) por el costo de los feedback. En nuestro caso no son muy costosos por lo que apenas se notaran. -->
+Con el fin de comparar la utilidad real de nuestro protocolo contra la maxima utilidad posible, definiremos los siguientes conceptos:
 
-Las gráficas de ambas partes y los casos de estudio son iguales. 
-De la siguiente forma:
+- Limite teorico: Este es igual a la carga ofrecida, ya que la carga util no puede superarla.
+- Limite de capacidad de la red: Este es igual a la menor velocidad de transferencia en los enlaces.
 
 ![Carga util vs Carga ofrecida](./GRAFICAS/CUtil-vs-COfrecida-P1-C1.png){width=auto height=250}
+
+> Obs: Ésta gráfica es igual para ambos casos de estudio, por lo que no se muestra la otra.
 
 Para una mejor visualización de los datos hicimos la misma gráfica pero de `Carga útil vs log(Carga ofrecida)`.
 Esta es una mejor forma para visualizar datos que son cada vez más dispersos, como en nuestro caso. Además ayuda a ver el crecimiento relativo y no absoluto como en la anterior gráfica.
 
 ![Carga util vs log(Carga ofrecida)](./GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=auto height=250}
-El gráfico se hizo aplicándole a cada dato del eje x logaritmo natural para una mejor visualización de la tendencia de los datos.
+> El gráfico se hizo aplicándole a cada dato del eje x logaritmo natural para una mejor visualización de la tendencia de los datos.
 
-<!--
-FIXME: Gráficas pendientes por explicar:
-  - Carga ofrecida vs carga util.
--->
+Podemos notar lo siguiente:
 
-<!--
-Las gráficas de `delay` indican el tiempo que le toma a cada paquete consumirse desde que se creo.
-En la `parte 2`, la gráfica esta en contante crecimiento en ambos casos de igual forma, esto es asi gracias a que los paquetes se generan a un mayor ritmo del que se consumen y se van almacenando en la red. Notar que la red tiene una capacidad finita por lo que esto seria hasta el limite de su capacidad <!- FIXME: no se si es correcta esta hipótesis/observación -> (seria interesante ver un gráfico donde pase, al aumentar el generationInterval o dejar correr la simulación mas tiempo), en nuestro caso no llegamos al limite de la capacidad de nuestra red, por lo que no se pierden paquetes.
+- Claramente la carga ofrecida aumentará de forma inversamente proporcional al aumento del generationInterval.
+- La carga útil y carga ofrecida es igual al inicio, osea en valores chicos.
+- Mientras crece la carga ofrecida, la carga útil lo hará a menor ritmo. Esto es gracias al aumento de la complejidad del sistema requiriendo que en vez de enviarse paquetes, se envíen feedback para la administración del sistema.
+- La carga útil crece hasta cierto punto, este límite se debe a la capacidad del sistema.
 
-![Delay](./GRAFICAS/Delay-P2-C1.png){width=auto height=250}
+Como podemos ver en los graficos, la carga recibida inicialmente no varia notablemente del limite teorico, lo cual habla muy bien de nuestro protocolo por su bajo costo.
+Luego, podemos notar que al acercarse la carga recibida al limite de la capacidad de la red, es cuando empieza a separarse del limite teorico y estabilizarse por debajo del mismo.
 
-Podemos ver en la siguiente gráfica de la `cantidad de paquetes generados vs los paquetes en el sistema` que se mantiene nuestra hipótesis, los paquetes se van almacenando en la red provocando nuevamente una tendencia al alza de la cantidad de paquetes en el sistema. Los paquetes en el sistema son la cantidad de paquetes generados menos los descartados (ninguno en este caso) y los paquetes consumidos.
+Gracias a estas graficas podemos concluir que nuestro protocolo controla eficientemente la saturacion de los buffers logrando el objetivo para nuestros casos de estudio.
+A su vez, hay que notar que aun se debe mejorar ya que no asegura una llegada en orden de los paquetes ni su retransmision para que lleguen todos.
 
-![cantidad de paquetes generados vs los paquetes en el sistema](./GRAFICAS/Pks-Dentro-P2-C1.png){width=auto height=250}
-
-En la siguiente gráfica de los `paquetes salientes del sistema` podremos ver la consumición de los paquetes:
-
-![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P2-C1.png){width=auto height=250}
-
-Recordar que estas son las variables que se resta a la cantidad de paquetes generados para obtener la cantidad de paquetes aun dentro del sistema.
-En la `parte 1`, podemos ver como el `delay` crece de la misma forma hasta que se "estabiliza" llegado un punto.
-
-![Delay](./GRAFICAS/Delay-P1-C1.png){width=auto height=250}
-
-A su vez ocurre algo similar con la `cantidad de paquetes generados vs los paquetes en el sistema`.
-
-![cantidad de paquetes generados vs los paquetes en el sistema](./GRAFICAS/Pks-Dentro-P1-C1.png){width=auto height=250}
-
-La causa de todo esto la podemos ver claramente en el siguiente gráfico de los `paquetes salientes del sistema`.
-
-![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P1-C1.png){width=auto height=250}
-
-Esta gráfica si cambia entre ambos casos, pero su influencia es igual.
-
-![paquetes salientes del sistema](./GRAFICAS/Pks-Salientes-P1-C2.png){width=auto height=250}
-
-La causa de todo esto es que la red alcanzo su capacidad maxima y empezó a descartar paquetes causando esta "estabilidad" en los anteriores gráficos.
-Notar que mas que estabilidad, se alcanzo un techo en el sistema. Se alcanzo el limite de su capacidad.
-
-Podemos concluir que al introducirse paquetes dentro de una red mas rápido de lo que pueden llegar a consumirse, los paquetes deberán ser almacenados dentro de la red. Llegado ese punto, ante una constante generación de paquetes superior a una constante consumición de los mismos, podemos decir que cada vez serán mas los paquetes almacenados en la red.
-A su vez, la red tiene una capacidad finita y ante un constante crecimiento de la cantidad de paquetes almacenados en la red, esta llegara a un limite y deberá empezar a descartarlos. Al dropear los paquetes, estos salen de la red. Por lo tanto llegados a ese punto, la cantidad de paquetes en el sistema se estabilizara y también la cantidad de paquetes en los buffers ocasionando que el delay de los paquetes también se estabilice.
--->
+---
 
 ## Discusiones:
 
