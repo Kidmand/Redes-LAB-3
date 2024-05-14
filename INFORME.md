@@ -44,7 +44,7 @@ Para lograrlo, diseñamos un protocolo. Los protocolos son un conjuntos de regla
 Describir el estado del arte. (trabajos previos) + Ej: "En la actualidad se han propuesto varios protocolos para controlar la congestion y flujo en redes, como TCP, ..."
 -->
 
-En la actualidad se han propuesto varios protocolos para controlar la congestión y flujo en redes. Por ejemplo, TCP el cual garantiza que el receptor reciba todos los paquetes enviados desde el emisor, pero para lograrlo permite pérdidas de paquetes. ¿Cómo soluciona esto? revisándolos.
+En la actualidad se han propuesto varios protocolos para controlar la congestión y flujo en redes. Por ejemplo, TCP el cual garantiza que el receptor reciba todos los paquetes enviados desde el emisor, pero para lograrlo permite pérdidas de paquetes. ¿Cómo soluciona esto? reenviándolos.
 Algunos intentan solucionar este problema evitando que no se pierdan de ninguna forma, esto lo hacen con paquetes de control para no saturar ningún buffer de la red. Otros implementan una mezcla de ambos, para garantizar la entrega de paquetes y evitar la saturación de buffers.
 
 <!--
@@ -62,9 +62,9 @@ Para trabajar sobre redes utilizamos el simulador de eventos discretos **(Omnet+
    + Obs: Incluir las primeras gráficas de la parte 1, con las conclusiones y problemas que encontramos osea interpretarlas (ej, aca podemos ver que los paquetes, buffers, paquetes enviado, tal y tal cosa ...)
 -->
 
-Para empezar a ver los problemas de congestión y el control de flujo así como también ver la manera en la que nuestro protocolo funciona, tenemos dos casos de estudios para poder analizar más en detalle lo mencionado anteriormente.
+Para empezar a ver los problemas de congestión y el control de flujo así como también ver la manera en la que nuestro protocolo funciona, tenemos dos casos de estudio para poder analizar más en detalle lo mencionado anteriormente.
 
-En los diferentes casos de estudio van a cambiar las tasas de transferencia de datos en los distintos enlaces generando el fenómeno **cuello de botella**. Es decir que nos encontramos un enlace con menor tasa de transferencia que el resto de los enlaces de la red, lo que genera un alamacenamiento descontrolado de paquetes que conllevaría a la pérdida de paquetes. 
+En los diferentes casos de estudio van a cambiar las tasas de transferencia de datos en los distintos enlaces, generando el fenómeno **cuello de botella**. Es decir que nos encontramos un enlace con menor tasa de transferencia que el resto de los enlaces de la red, lo que genera un almacenamiento descontrolado de paquetes que conllevaría a la pérdida de paquetes. 
 
 Para ello vemos algunas componentes y los enlaces existentes en nuestra red (abstracta) de estudio:
 
@@ -110,7 +110,7 @@ En la siguiente gráfica podemos ver como se llenan los buffers a lo largo del t
 
 Analizando, podemos notar tres cosas:
 
-- El buffer de **NodeTx** varía mucho a lo largo del tiempo debido a que el generador de paquetes envía los mismo a una tasa definida por `exponential(10ms)` esto es más rápido de lo que su **queue** puede enviarlos. Notar que nunca supera los `200` paquetes por lo tanto no descarta paquetes por falta de espacio.
+- El buffer de **NodeTx** varía mucho a lo largo del tiempo debido a que el generador de paquetes envía los mismos a una tasa definida por `exponential(10ms)` esto es más rápido de lo que su **queue** puede enviarlos. Notar que nunca supera su tamaño de buffer (`2000000` paquetes) por lo tanto no descarta paquetes por falta de espacio.
 - El buffer **intermedio Nx** se mantiene constantemente en `1` debido a que recibe paquetes a la misma tasa que los envía. (i.e `1Mbps`). Nuevamente no descarta paquetes por falta de espacio.
 - El buffer de **NodeRx** es particular, ya que podemos ver como su buffer va creciendo de forma lineal y luego se mantiene constante en `200` paquetes, esto pasa porque empezó a descartar paquetes por falta de espacio, debido a que recibe paquetes a una tasa de `1Mbps` pero solo puede enviarlos a `0.5Mbps` generando un **cuello de botella** en el enlace entre **NodeRx.queue** y **Sink**.
 
@@ -153,7 +153,7 @@ El control de flujo y el control de congestión son dos conceptos fundamentales 
 
 - El control de flujo se refiere a la gestión de la velocidad de transferencia de datos entre dos puntos en una red para garantizar que el receptor no se sature con más datos de los que puede manejar.
 - Se ocupa de asegurar que el emisor no envíe más datos de los que el receptor puede procesar o almacenar temporalmente en su búfer.
-- El objetivo principal del control de flujo es garantizar la eficiencia y la fiabilidad en la transmisión de datos, evitando la congestión en la red.
+- El objetivo principal del control de flujo es garantizar la eficiencia y la fiabilidad en la transmisión de datos, evitando saturar el receptor.
 
 **Control de congestión:**
 
@@ -217,8 +217,8 @@ Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el c
 - Cuando se supere la cota, nuestro protocolo detectará esto, por lo cual encolamos un paquete creado por nosotros en la primera posición de la cola del **queue0**, que será enviado inmediatamente a **NodeRx** que éste a su vez tiene un mecanismo que identifica este paquete como importante.
 - Cuando lo detecta enviamos un paquete (indicando que se debe parar la transmisión) hacia el buffer **queue1** que éste a su vez envía el paquete a **NodeTx** indicando que se dejen de enviar paquetes para evitar la saturación de los buffers.
 - En nuestro algoritmo, **NodeRx** envía constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
-- Mientras **NodeTx** no reciba un paquete que indique que deba parar la transmisión, éste seguirá retransmitiendo.
-- Una vez que **NodeTx** paró de transmitir porque recibió un paquete indicando que debía parar, éste seguirá sin retransmitir hasta que le indiquen lo contrario.
+- Mientras **NodeTx** no reciba un paquete que indique que deba parar la transmisión, éste seguirá transmitiendo.
+- Una vez que **NodeTx** paró de transmitir porque recibió un paquete indicando que debía parar, éste seguirá sin transmitir hasta que le indiquen lo contrario.
 - Cuando los buffers dejen de superar la cota establecida, el último buffer que dejó de superar la cota, enviará un paquete hacia **NodeTx** indicando que reanude la transmisión.
 - Para el caso 1, el buffer **queue0** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
@@ -226,13 +226,13 @@ Antes de empezar a explicar el procedimiento del protocolo, vamos a definir el c
 
 - Supongamos ahora que la congestión se produce en el buffer interno de **NodeRx** es decir en **NodeRx.traRx**, en este caso se produce un cuello de botella con lo cual los paquete que van llegando al buffer interno de **NodeRx** irán almacenándose continuadamente.
 - Al igual que en el caso 1, si continuamos enviado paquetes, el buffer interno se irá llenando gradualmente.
-- Cuando se supere la cota del buffer interno, nuestro protocolo detectará esto, por lo cual se enviará un paquete desde **NodeRx** hacia **queue1** para que este lo envía a **NodeTx** indicando que se pare la transmisión.
+- Cuando se supere la cota del buffer interno, nuestro protocolo detectará esto, por lo cual se enviará un paquete desde **NodeRx** hacia **queue1** para que este lo envíe a **NodeTx** indicando que se pare la transmisión.
 - Análogamente a lo anterior **NodeRx** envía constantemente paquetes a **queue1**, esto paquetes son enviados a **NodeTx** indicando que siga transmitiendo.
 - Mientras no se supere la cota del buffer interno de **NodeRx**, éste seguirá enviando mensajes a **queue1** para que siga la transmisión de paquetes.
 - Una vez que el buffer interno deje de superar la cota, se enviará un paquete a **queue1** hacia **NodeTx** indicando la reanudación de la transmisión.
 - Para el caso 2, el buffer interno de **NodeRx** será el responsable de enviar el paquete para que se deba reanudar la transmisión.
 
-Entonces en resumidas cuentas, nuestro protocolo detecta cuando los buffers superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes con lo cual los paquetes del emisor irán almacenándose en su buffer interno, cuando se detecte que todos los buffers ya no superan las cotas, entonces se envía nuevamente un paquete al emisor avisándole que puede restablecer el envió de los paquetes y así sucesivamente.
+Entonces en resumidas cuentas, nuestro protocolo detecta cuando los buffers superan las cotas establecidas enviando un mensaje al emisor para que deje de enviar paquetes, con lo cual los paquetes del emisor irán almacenándose en su buffer interno, cuando se detecte que todos los buffers ya no superan las cotas, entonces se envía nuevamente un paquete al emisor avisándole que puede restablecer el envió de los paquetes y así sucesivamente.
 Lo curioso de esto es que mientras vaya transcurriendo el tiempo de la simulación, nuestro protocolo se establecerá en un valor fijo de paquete que se envía y paquetes almacenados en los buffers. Esto lo visualizaremos en la parte de resultados.
 
 ### Cómo llegamos a las ideas para la implementación de nuestro protocolo.
@@ -285,15 +285,15 @@ A continuación les mostramos las gráficas de los dos casos de estudio en donde
 
 - **Tx -> (NodeTx)**: Podemos observar que en el buffer interno de **Tx**, a diferencia de no tener el protocolo (parte 1), como éste se irá llenando aproximadamente lineal a partir de cierto tiempo (más adelante lo analizamos), y podemos ver que el crecimiento no cesará, pero el buffer tiene suficiente tamaño para almacenar todos los paquetes que no son enviados, por lo cual no se descartarán paquetes.
   Notemos que el comportamiento del **NodeTx** es similar en ambos casos de estudio.
-- **Nx -> (queue0)**: En esta parte podemos ver una diferencia entre los distintos casos. A primera vista podemos observar que en el **caso 1**, el almacenamiento del buffer se mantiene constante en `1`, representando que el buffer a medida que van llegando los paquetes los envía inmediatamente, logrando así un buen comportamiento de nuestro protocolo.
+- **Nx -> (queue0)**: En esta parte podemos ver una diferencia entre los distintos casos. A primera vista podemos observar que en el **caso 1**, el almacenamiento del buffer se mantiene constante en `1`, representando que el buffer a medida que van llegando los paquetes los envía inmediatamente, logrando así un buen comportamiento.
   Por otra parte, en el **caso 2** podemos ver como el almacenamiento aumenta linealmente hasta alcanzar la cota en un determinado tiempo. Al llegar a la cota, nuestro protocolo se encargaría de avisar al emisor que deje de enviar paquetes, para evitar la saturación del mismo. De esta forma vemos como se desatura (en relación a la cota), porque nuestro protocolo avisará al emisor que reanude la transmisión, y siguiendo este proceso iterativamente a lo largo de toda la simulación vemos como se estabiliza el almacenamiento del buffer cercano a la cota, produciendo así un efecto serrucho como se ve en la gráfica. Consiguiendo que en ninguno de los dos casos perdamos paquetes.
-- **Rx -> (NodeRx)**: En el buffer interno de **Rx** podemos ver nuevamente entre ambas gráficas que difieren según el caso. Notar algo particular en relación al comportamiento del buffer **Nx -> (queue0)**, éste en el **caso 1** se comporta similarmente (casi igual) al Rx del **caso 2**. Análogamente el **Rx** del **caso 1** se comporta similarmente (casi igual) al **Nx** del **caso 2**. Es decir, en otras palabras se comportan "igual" pero intercambiados.  
+- **Rx -> (NodeRx)**: En el buffer interno de **Rx** podemos ver nuevamente entre ambas gráficas que difieren según el caso. Notar algo particular en relación al comportamiento del buffer **Nx -> (queue0)**, éste en el **caso 1** se comporta similar (casi igual) al Rx del **caso 2**. Análogamente el **Rx** del **caso 1** se comporta similar (casi igual) al **Nx** del **caso 2**. Es decir, en otras palabras se comportan "igual" pero intercambiados.  
   El porqué pasa esto es debido a las distintas tasas de transferencia en los casos de estudio.
-  Veamoslá en profundidad:
+  Veamosló en profundidad:
   - El cuello de botella en el **caso 1** se encuentra en el enlace interno del nodo **Rx**, por ello este buffer interno será el primero en llegar a la cota.
   - El cuello de botella en el **caso 2** se encuentra en el enlace desde **Nx -> queue0** hacia el nodo **Rx -> (NodeRx)**, de esta forma el buffer **queue0** llegará primero a la cota.
 
-Cabe destacar que si observamos muy detenidamente los gráficos, en resumidas cuenta, estos explican detalladamente el comportamiento de nuestro protocolo. Es decir, que las distintas partes de los gráfico están diciendo algo muy importante sobre cómo es que funciona el protocolo. Por ejemplo como mencionamos antes, la parte del gráfico del nodo **Nx** del segundo caso de estudio después de un determinado tiempo se establece la cota del buffer **Nx** en un almacenamiento de aproximadamente 160 paquetes y luego se mantiene el almacenamiento en un rango de **`150--170`** paquetes durante toda la simulación restante. Esto sucede debido a que nuestro protocolo cada vez que el buffer supera su cota establecida lo detecta y le dice al emisor que pare, una vez que el buffer deja de superar su cota, el emisor comienza nuevamente a retransmitir.
+Cabe destacar que si observamos muy detenidamente los gráficos, en resumidas cuenta, estos explican detalladamente el comportamiento de nuestro protocolo. Es decir, que las distintas partes de los gráfico están diciendo algo muy importante sobre cómo es que funciona el protocolo. Por ejemplo como mencionamos antes, la parte del gráfico del nodo **Nx** del segundo caso de estudio después de un determinado tiempo se establece la cota del buffer **Nx** en un almacenamiento de aproximadamente 160 paquetes y luego se mantiene el almacenamiento en un rango de **`150--170`** paquetes durante toda la simulación restante. Esto sucede debido a que nuestro protocolo cada vez que el buffer supera su cota establecida lo detecta y le dice al emisor que pare, una vez que el buffer deja de superar su cota, el emisor comienza nuevamente a transmitir.
 
 Otro punto importante a mencionar es la parte del gráfico del nodo **Tx caso 1** que a partir de los **`25seg`** el crecimiento del almacenamiento del buffer es lineal. Entonces observando detenidamente el gráfico de **Nx caso 1** vemos que justamente el almacenamiento del buffer se estabiliza justo a los **`25seg`**, este comportamiento no es casualidad, ya que se produce cuando el buffer supera su cota establecida, que para el **caso 1** la cota del buffer es de **`100`** paquetes, por lo cual una vez que se supere la cota, el nodo **Tx** dejará de enviar paquetes hacia el nodo **Nx** almacenando dichos paquetes en su buffer interno, que es justamente esto lo que podemos ver en las gráficas. El crecimiento del almacenamiento del buffer es lineal a partir de la primera saturación **(se pasa de la cota establecida)** del buffer.
 
@@ -338,7 +338,7 @@ Ahora veamos que pasa con el **delay** en la parte 2:
 > Obs: Ésta gráfica es igual para ambos casos de estudio, por lo que no se muestra la otra.
 
 Vemos como no se ve ninguna cota en términos del **delay**. Este aumenta aproximadamente lineal a lo largo de toda la simulación. Se debe a que los paquetes se generan a un mayor ritmo del que se consumen durante la simulación. Generando así que los paquetes se vayan almacenando en algún buffer **(Tx.queue)** cada vez por más tiempo ya que se generan más rápido de lo que se consumen.
-(Sería interesante ver un gráfico en donde se llegue a saturar el buffer al aumentar el generationInterval o dejar correr la simulación más tiempo)
+(Sería interesante ver un gráfico en dónde se llegue a saturar el buffer al aumentar el generationInterval o dejar correr la simulación más tiempo)
 
 Como mecionamos al enunciar el protocolo, se utilizan paquetes de control (feedbackPackets) para evitar la perdida de paquetes. Analicemos como afecta a la utilidad de la red.
 Para esto definimos los conceptos de:
@@ -346,13 +346,13 @@ Para esto definimos los conceptos de:
 - Carga ofrecida: Cantidad de paquetes generados.
 - Carga útil: Cantidad de paquetes consumidos en el sink. Recordemos que los paquetes de control nunca llegan al sink.
 
-Con el fin de analizar como afectan a la utilidad de la red, necesitamos ver cuales son los casos en los que la cantidad de paquetes de control cambiara influenciando nuestras estadisticas.
+Con el fin de analizar como afectan a la utilidad de la red, necesitamos ver cuales son los casos en los que la cantidad de paquetes de control cambiará influenciando nuestras estadísticas.
 
-Los paquetes de control se envian cada vez que cambia el estado del buffer de Nx o Rx de saturado a no saturado o viceversa. Por lo tanto, para variar el numero de paquetes de control debemos variar la cantidad de veces que se satura y desaturan sus buffers.
+Los paquetes de control se envian cada vez que cambia el estado del buffer de Nx o Rx de saturado a no saturado o viceversa. Por lo tanto, para variar el número de paquetes de control debemos variar la cantidad de veces que se satura y desaturan sus buffers.
 
-Con este fin, variaremos la generacion de paquetes por segundo, osea el `generationInterval`.
+Con este fin, variaremos la generación de paquetes por segundo, osea el `generationInterval`.
 
-Para ello creamos las gráficas de **Carga ofrecida vs carga útil**. Estas se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generación de paquetes:
+Para ello creamos las gráficas de **Carga ofrecida vs carga útil**. Éstas se hicieron cambiando para cada parte y caso solamente el intervalo de tiempo de la generación de paquetes:
 
 ```cpp
 Network.nodeTx.gen.generationInterval=exponential(x)
