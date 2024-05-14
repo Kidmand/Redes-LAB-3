@@ -360,10 +360,10 @@ Network.nodeTx.gen.generationInterval=exponential(x)
 
 Con los siguientes valores en x: `0.05`, `0.1`, `0.15`, `0.2`, `0.3`, `0.4`, `0.8`, `1.6`, `3.2`.
 
-Con el fin de comparar la utilidad real de nuestro protocolo contra la maxima utilidad posible, definiremos los siguientes conceptos:
+Con el fin de comparar la utilidad real de nuestro protocolo contra la máxima utilidad posible, definiremos los siguientes conceptos:
 
-- Limite teorico: Este es igual a la carga ofrecida, ya que la carga util no puede superarla.
-- Limite de capacidad de la red: Este es igual a la menor velocidad de transferencia en los enlaces.
+- Límite teórico: Éste es igual a la carga ofrecida, ya que la carga útil no puede superarla.
+- Límite de capacidad de la red: Éste es igual a la menor velocidad de transferencia en los enlaces.
 
 ![Carga util vs Carga ofrecida](./GRAFICAS/CUtil-vs-COfrecida-P1-C1.png){width=auto height=250}
 
@@ -373,7 +373,7 @@ Para una mejor visualización de los datos hicimos la misma gráfica pero de `Ca
 Esta es una mejor forma para visualizar datos que son cada vez más dispersos, como en nuestro caso. Además ayuda a ver el crecimiento relativo y no absoluto como en la anterior gráfica.
 
 ![Carga util vs log(Carga ofrecida)](./GRAFICAS/CUtil-vs-logCOfrecida-P1-C1.png){width=auto height=250}
-> El gráfico se hizo aplicándole a cada dato del eje x logaritmo natural para una mejor visualización de la tendencia de los datos.
+> El gráfico se hizo aplicándole a cada dato del eje x el logaritmo natural para una mejor visualización de la tendencia de los datos.
 
 Podemos notar lo siguiente:
 
@@ -382,11 +382,10 @@ Podemos notar lo siguiente:
 - Mientras crece la carga ofrecida, la carga útil lo hará a menor ritmo. Esto es gracias al aumento de la complejidad del sistema requiriendo que en vez de enviarse paquetes, se envíen feedback para la administración del sistema.
 - La carga útil crece hasta cierto punto, este límite se debe a la capacidad del sistema.
 
-Como podemos ver en los graficos, la carga recibida inicialmente no varia notablemente del limite teorico, lo cual habla muy bien de nuestro protocolo por su bajo costo.
-Luego, podemos notar que al acercarse la carga recibida al limite de la capacidad de la red, es cuando empieza a separarse del limite teorico y estabilizarse por debajo del mismo.
+Como podemos ver en los gráficos, la carga recibida inicialmente no varía notablemente del límite teórico, lo cual habla muy bien de nuestro protocolo por su bajo costo.
+Luego, podemos notar que al acercarse la carga recibida al límite de la capacidad de la red, es cuando empieza a separarse del límite teórico y estabilizarse por debajo del mismo.
 
-Gracias a estas graficas podemos concluir que nuestro protocolo controla eficientemente la saturacion de los buffers logrando el objetivo para nuestros casos de estudio.
-A su vez, hay que notar que aun se debe mejorar ya que no asegura una llegada en orden de los paquetes ni su retransmision para que lleguen todos.
+Gracias a estas gráficas podemos concluir que nuestro protocolo controla eficientemente la saturación de los buffers logrando el objetivo para nuestros casos de estudio.
 
 ---
 
@@ -413,10 +412,10 @@ Ahora especifiquemos los tamaños de buffers y sus cotas:
 - **queue0: 200pkt, cota=%80 => 160pkt**
 - **NodeRx.queue: 200pkt, cota=%50 => 100pkt**
 
-En esta situación tenemos que el buffer de **queue0** se va a llenar en seguida, supongamos **199pkt** por lo que avisará que no se envíen más paquetes, con lo cual va a empezar a enviar todos su paquetes **(los 199pkt)** a **NodeRx.queue**, pero éste último tenía paquetes en su buffer, como envía tan lento le pueden llegar todos los de queue0 y en ese punto **NodeRx.queue** va a descartar paquetes. Esto sucede porque en la red hay más paquetes que los que pueden entrar en un solo buffer.
+En esta situación tenemos que el buffer de **queue0** se va a llenar enseguida, supongamos **199pkt** por lo que avisará que no se envíen más paquetes, con lo cual va a empezar a enviar todos su paquetes **(los 199pkt)** a **NodeRx.queue**, pero éste último tenía paquetes en su buffer, como envía tan lento le pueden llegar todos los de queue0 y en ese punto **NodeRx.queue** va a descartar paquetes. Esto sucede porque en la red hay más paquetes que los que pueden entrar en un solo buffer.
 
-De esta forma introducimos una posible mejora al protocolo, además de garantizar que nunca se superen las cotas. Revisar también que en la red nunca haya más paquetes que los que pueden entrar en un buffer (ignorando el nodeTX). Esto se podría llevar a cabo con mensaje de control que informe al siguiente nodo cuántos paquetes se tienen actualmente en la cola, luego cuando se recibe esa información, sumarla a los paquetes que se tienen en ese nodo, y si la suma da mayor a la capacidad del buffer avisar que no se envíen mas paquetes.
-Esta mejora le pusimo como nombre **Invariante de buffers** es decir que la suma de todos los paquetes en la red para lograr una buena eficiencia, no debe superar capacidad de los buffers (200Pkt para nuestro caso), porque en el caso en el que en la red se encuetren más paquetes que los que se pueden almacenar, nuestro protoclo comenzará a descartar esos paquetes. 
+De esta forma introducimos una posible mejora al protocolo, además de garantizar que nunca se superen las cotas. Revisar también que en la red nunca haya más paquetes que los que pueden entrar en un buffer (ignorando el nodeTX). Esto se podría llevar a cabo con mensaje de control que informe al siguiente nodo cuántos paquetes se tienen actualmente en la cola, luego cuando se recibe esa información, sumarla a los paquetes que se tienen en ese nodo, y si la suma da mayor a la capacidad del buffer avisar que no se envíen más paquetes.
+Esta mejora le pusimo como nombre **Invariante de buffers**, es decir que la suma de todos los paquetes en la red para lograr una buena eficiencia, no debe superar la capacidad de los buffers (200Pkt para nuestro caso), porque en el caso en el que en la red se encuetren más paquetes que los que se pueden almacenar, nuestro protoclo comenzará a descartar esos paquetes. 
 
 ---
 
@@ -436,7 +435,7 @@ Si agregamos imágenes de Tanembaun para explicar algo de flujo y congestion, ta
 
 ## Anexo: Inteligencia Artificial
 
-En este anexo contamos como utilizamos las IA para desarrollo del estudio de redes.
+En este anexo contamos cómo utilizamos las IA para desarrollo del estudio de redes.
 
 Consideramos que podemos separar en dos partes como utilizamos la IA:
 
@@ -449,6 +448,6 @@ Para este tipo de consultas utilizamos principalmente **Chat Gpt 3.5**, consider
 
 ### Complemento en la escritura de código.
 
-Para esto tenemos **Github Copilot**, nos ayuda a completar código que es repetitivo o sencillo, no dejamos que nos complete todo porque siempre sale mal y terminamos borrando lo que nos sugiere. Pero para cosas como completar un `for` o un `if` nos ayuda mucho. Notamos un incremento en nuestra velocidad de escritura de código y consideramos que esto es muy bueno, por eso la seguimos utilizando. Por otra parte nos planteamos si esto nos perjudica en algo y encontramos una gran día para el otro no lo tenemos más, quizá nos cueste más escribir código. Por ello cada tanto la desactivamos y escribimos código a mano para no perder la costumbre.
+Para esto tenemos **Github Copilot**, nos ayuda a completar código que es repetitivo o sencillo, no dejamos que nos complete todo porque siempre sale mal y terminamos borrando lo que nos sugiere. Pero para cosas como completar un `for` o un `if` nos ayuda mucho. Notamos un incremento en nuestra velocidad de escritura de código y consideramos que esto es muy bueno, por eso la seguimos utilizando. Por otra parte nos planteamos si esto nos perjudica en algo y encontramos una problemática, el día de mañana quizá nos cueste más escribir código. Por ello cada tanto la desactivamos y escribimos código a mano para no perder la costumbre.
 
 ---
