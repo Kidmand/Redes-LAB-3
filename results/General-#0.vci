@@ -1,26 +1,62 @@
-file 7973110 1554859265                                         
-version 2
-run General-0-20190410-03:20:11-3051
+file 1748 1716435196                                            
+version 3
+run General-0-20240523-00:33:14-893641
 attr configname General
-attr datetime 20190410-03:20:11
+attr datetime 20240523-00:33:14
+attr datetimef 20240523-003314
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
+attr iterationvarsd ""
 attr iterationvarsf ""
 attr measurement ""
 attr network Network
-attr processid 3051
+attr processid 893641
 attr repetition 0
 attr replication #0
 attr resultdir results
 attr runnumber 0
 attr seedset 0
-param Network.gen.generationInterval exponential(0.001)
-param Network.queue.serviceTime exponential(0.001)
+config network Network
+config sim-time-limit 200s
+config Network.nodeTx.gen.generationInterval exponential(0.1)
+config Network.nodeTx.gen.packetByteSize 12500
+config Network.queue0.bufferSize 200
+config Network.queue1.bufferSize 200
+config Network.nodeRx.traRx.bufferSize 200
+config Network.nodeTx.traTx.bufferSize 2000000
+config Network.nodeRx.traRx.bufferCota 0.5
+config Network.queue0.bufferCota 0.8
+config Network.queue1.bufferCota 1
+config Network.queue0.serviceTime exponential(0.001)
+config Network.queue1.serviceTime exponential(0.001)
 
-vector 0  Network.sink  Delay  ETV
-0	494 1697398 4 175148 0.000795874505 43.617671252025 43690 0 0.221020690311 3356.2044985127 345.28080688738
-0	1697892 1735581 175152 350137 43.617838570239 87.382163834447 43690 0 0.300331321051 4829.2237730003 769.23749305902
-0	3433473 1764315 350139 525517 87.38266209014 131.56295076981 43690 0 0.255925403643 3289.8707228179 337.43006278049
-0	5197788 1779937 525519 700054 131.563032037015 175.330438425685 43690 0 0.254443482269 3925.2473801314 505.83840117808
-0	6977725 995385 700058 798280 175.33084367187 199.999008411653 24479 0 0.206897725172 1376.45323534 127.2424838639
+vector 0 Network.nodeTx.gen packetSent ETV
+vector 1 Network.nodeTx.traTx BufferSizeVector ETV
+vector 2 Network.nodeTx.traTx PacketDropVector ETV
+vector 3 Network.nodeTx.traTx ReceiveFeedbackVector ETV
+vector 4 Network.queue0 BufferSizeVector ETV
+vector 5 Network.queue0 PacketDropVector ETV
+vector 6 Network.queue0 FeedbackVector ETV
+vector 7 Network.queue1 BufferSizeVector ETV
+vector 8 Network.queue1 PacketDropVector ETV
+vector 9 Network.queue1 FeedbackVector ETV
+vector 10 Network.nodeRx.sink packetReceived ETV
+vector 11 Network.nodeRx.traRx BufferSizeVector ETV
+vector 12 Network.nodeRx.traRx PacketDropVector ETV
+vector 13 Network.nodeRx.traRx SendFeedbackPktVector ETV
+0	1631 8 0 0 0 0 1 0 0 0 0
+1	1639 8 0 0 0 0 1 0 0 0 0
+2	1647 8 0 0 0 0 1 0 0 0 0
+3	1655 8 0 0 0 0 1 0 0 0 0
+4	1663 8 0 0 0 0 1 0 0 0 0
+5	1671 8 0 0 0 0 1 0 0 0 0
+6	1679 8 0 0 0 0 1 0 0 0 0
+7	1687 8 0 0 0 0 1 0 0 0 0
+8	1695 8 0 0 0 0 1 0 0 0 0
+9	1703 8 0 0 0 0 1 0 0 0 0
+10	1711 9 0 0 0 0 1 0 0 0 0
+11	1720 9 0 0 0 0 1 0 0 0 0
+12	1729 9 0 0 0 0 1 0 0 0 0
+13	1738 9 0 0 0 0 1 0 0 0 0
+
